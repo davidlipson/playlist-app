@@ -6,7 +6,7 @@ const Card = styled.div<{ isShared?: boolean }>`
   background: ${
     (props) =>
       props.isShared
-        ? "rgba(29, 185, 84, 0.15)" // Green tint for shared playlists
+        ? "rgb(44 249 43 / 36%)" // New green background for shared playlists
         : "rgba(255, 255, 255, 0.1)" // Default for my playlists
   };
   backdrop-filter: blur(10px);
@@ -15,14 +15,11 @@ const Card = styled.div<{ isShared?: boolean }>`
   cursor: pointer;
   transition: all 0.3s ease;
   color: white;
-  border: ${(props) =>
-    props.isShared
-      ? "2px solid rgba(29, 185, 84, 0.3)"
-      : "2px solid transparent"};
+  border: 2px solid transparent; // Remove green border for shared playlists
 
   &:hover {
     background: ${(props) =>
-      props.isShared ? "rgba(29, 185, 84, 0.25)" : "rgba(255, 255, 255, 0.2)"};
+      props.isShared ? "rgb(44 249 43 / 50%)" : "rgba(255, 255, 255, 0.2)"};
     transform: translateY(-5px);
   }
 `;
