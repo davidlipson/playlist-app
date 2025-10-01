@@ -20,10 +20,10 @@ const sequelize = new Sequelize(
       : undefined,
     dialectOptions: process.env.DATABASE_URL?.includes("postgresql")
       ? {
-          ssl: {
+          ssl: process.env.NODE_ENV === "production" ? {
             require: true,
             rejectUnauthorized: false,
-          },
+          } : false,
         }
       : undefined,
   }
