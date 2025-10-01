@@ -302,28 +302,28 @@ router.get("/share/:shareCode", authenticateToken, async (req, res) => {
       return res.status(404).json({ error: "Playlist not found" });
     }
 
-    // Check if user is trying to join their own playlist
+    // Check if user is trying to access their own playlist
     if (playlist.ownerId === req.user.id) {
-      return res.status(400).json({ error: "Cannot join your own playlist" });
-    }
-
-    // Check if already shared with this user
-    const existingShare = await SharedPlaylist.findOne({
-      where: {
-        playlistId: playlist.id,
-        sharedWithUserId: req.user.id,
-      },
-    });
-
-    if (!existingShare) {
-      // Share with current user
-      await SharedPlaylist.create({
-        playlistId: playlist.id,
-        sharedWithUserId: req.user.id,
-        sharedByUserId: playlist.ownerId,
+      // User is accessing their own playlist - just return the data without creating a share record
+      // This allows them to be redirected to their own playlist page
+    } else {
+      // Check if already shared with this user
+      const existingShare = await SharedPlaylist.findOne({
+        where: {
+          playlistId: playlist.id,
+          sharedWithUserId: req.user.id,
+        },
       });
+
+      if (!existingShare) {
+        // Share with current user
+        await SharedPlaylist.create({
+          playlistId: playlist.id,
+          sharedWithUserId: req.user.id,
+          sharedByUserId: playlist.ownerId,
+        });
+      }
     }
-    // If already shared, just return the playlist data (no error)
 
     // Get full playlist data with tracks from Spotify
     const spotifyPlaylist = await spotifyService.getPlaylist(
