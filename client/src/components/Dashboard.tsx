@@ -83,6 +83,7 @@ interface Playlist {
   isPublic: boolean;
   shareCode: string;
   commentCount: number;
+  likeCount: number;
   createdAt: string;
 }
 
@@ -166,12 +167,16 @@ const Dashboard: React.FC = () => {
     );
   }, [myPlaylists, sharedPlaylists, searchQuery]);
 
-  // Sort playlists by most commented, then most recent
+  // Sort playlists by sum of comments and likes (descending), then by date
   const sortedPlaylists = useMemo(() => {
     return [...allPlaylists].sort((a, b) => {
-      // First sort by comment count (descending)
-      if (b.commentCount !== a.commentCount) {
-        return b.commentCount - a.commentCount;
+      // Calculate total engagement (comments + likes)
+      const aEngagement = (a.commentCount || 0) + (a.likeCount || 0);
+      const bEngagement = (b.commentCount || 0) + (b.likeCount || 0);
+      
+      // First sort by total engagement (descending)
+      if (bEngagement !== aEngagement) {
+        return bEngagement - aEngagement;
       }
       // Then sort by creation date (descending)
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();

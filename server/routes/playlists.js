@@ -24,6 +24,7 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
       include: [
         { model: User, as: "owner", attributes: ["id", "displayName"] },
         { model: Comment, as: "comments", attributes: ["id"] },
+        { model: Like, as: "likes", attributes: ["id"] },
       ],
     });
 
@@ -64,6 +65,7 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
           isPublic: dbPlaylist.isPublic,
           shareCode: dbPlaylist.shareCode,
           commentCount: dbPlaylist.comments?.length || 0,
+          likeCount: dbPlaylist.likes?.length || 0,
           createdAt: dbPlaylist.createdAt,
         };
       })
@@ -102,6 +104,7 @@ router.get("/shared-playlists", authenticateToken, async (req, res) => {
           include: [
             { model: User, as: "owner", attributes: ["id", "displayName"] },
             { model: Comment, as: "comments", attributes: ["id"] },
+            { model: Like, as: "likes", attributes: ["id"] },
           ],
         },
       ],
@@ -120,6 +123,7 @@ router.get("/shared-playlists", authenticateToken, async (req, res) => {
       isPublic: shared.playlist.isPublic,
       shareCode: shared.playlist.shareCode,
       commentCount: shared.playlist.comments.length,
+      likeCount: shared.playlist.likes.length,
       createdAt: shared.playlist.createdAt,
       sharedAt: shared.createdAt,
     }));
