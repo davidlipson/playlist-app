@@ -10,7 +10,7 @@
     "build": "cd client && npm install && npm run build",
     "build:client": "cd client && npm install && npm run build",
     "start": "node server/index.js",
-    "heroku-postbuild": "cd client && npm ci && npm run build && cp -r build/* ../"
+    "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
