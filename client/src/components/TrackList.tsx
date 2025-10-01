@@ -12,7 +12,7 @@ const TrackListContainer = styled.div`
   backdrop-filter: blur(10px);
   border-radius: 15px;
   overflow: hidden;
-  margin-bottom: 120px; /* Add space for the Now Playing component */
+  margin-bottom: 90px; /* Add space for the Now Playing component */
 `;
 
 const ViewToggle = styled.div`
