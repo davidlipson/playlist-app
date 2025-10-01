@@ -276,12 +276,19 @@ const Dashboard: React.FC = () => {
     setJoinLoading(true);
     setJoinError(""); // Clear any previous errors
     try {
-      await axios.get(`/api/playlists/share/${shareCode.trim()}`);
+      const response = await axios.get(`/api/playlists/share/${shareCode.trim()}`);
+      const playlistData = response.data;
+      
       // Refresh playlists to show the newly joined playlist
       await fetchSharedPlaylists();
       setShowJoinModal(false);
       setShareCode("");
       setJoinError("");
+      
+      // Redirect to the newly joined playlist
+      if (playlistData.id) {
+        navigate(`/playlist/${playlistData.id}`);
+      }
     } catch (error: any) {
       console.error("Failed to join playlist:", error);
       const errorMessage =
