@@ -145,7 +145,15 @@ const PlaylistView: React.FC = () => {
 
       if (url) {
         const response = await axios.get(url);
-        setPlaylist(response.data);
+        const playlistData = response.data;
+
+        // If this is a shared playlist, redirect to the full playlist page
+        if (shareCode && playlistData.id) {
+          navigate(`/playlist/${playlistData.id}`, { replace: true });
+          return;
+        }
+
+        setPlaylist(playlistData);
       }
     } catch (error) {
       console.error("Failed to fetch playlist:", error);

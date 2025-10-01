@@ -325,17 +325,74 @@ router.get("/share/:shareCode", authenticateToken, async (req, res) => {
     }
     // If already shared, just return the playlist data (no error)
 
+    // Get full playlist data with tracks from Spotify
+    const spotifyPlaylist = await spotifyService.getPlaylist(
+      req.user.accessToken,
+      playlist.spotifyPlaylistId
+    );
+
+    // Get tracks
+    const tracksData = await spotifyService.getPlaylistTracks(
+      req.user.accessToken,
+      spotifyPlaylist.id
+    );
+
+    // Get likes for all tracks in this playlist
+    const playlistLikes = await Like.findAll({
+      where: { playlistId: playlist.id },
+      include: [{ model: User, as: "user", attributes: ["id", "displayName"] }],
+    });
+
+    // Group likes by track ID
+    const likesByTrack = {};
+    playlistLikes.forEach((like) => {
+      if (!likesByTrack[like.trackId]) {
+        likesByTrack[like.trackId] = [];
+      }
+      likesByTrack[like.trackId].push({
+        id: like.id,
+        user: like.user,
+        createdAt: like.createdAt,
+      });
+    });
+
+    // Get comments for this playlist
+    const comments = await Comment.findAll({
+      where: { playlistId: playlist.id },
+      include: [{ model: User, as: "user", attributes: ["id", "displayName"] }],
+    });
+
     res.json({
       id: playlist.id,
       spotifyId: playlist.spotifyPlaylistId,
-      name: playlist.name,
-      description: playlist.description,
-      imageUrl: playlist.imageUrl,
+      name: spotifyPlaylist.name,
+      description: spotifyPlaylist.description,
+      imageUrl: spotifyPlaylist.images?.[0]?.url || playlist.imageUrl,
       owner: {
         id: playlist.owner.id,
         displayName: playlist.owner.displayName,
       },
+      tracks: tracksData.items.map((item) => ({
+        id: item.track.id,
+        name: item.track.name,
+        artists: item.track.artists.map((artist) => ({
+          id: artist.id,
+          name: artist.name,
+        })),
+        album: {
+          id: item.track.album.id,
+          name: item.track.album.name,
+          imageUrl: item.track.album.images?.[0]?.url || null,
+        },
+        duration: item.track.duration_ms,
+        previewUrl: item.track.preview_url,
+        externalUrls: item.track.external_urls,
+        likes: likesByTrack[item.track.id] || [],
+      })),
+      isPublic: playlist.isPublic || false,
       shareCode: playlist.shareCode,
+      comments: comments,
+      totalTracks: tracksData.total,
     });
   } catch (error) {
     console.error("Error accessing shared playlist:", error);
