@@ -36,14 +36,18 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
 
         // If playlist doesn't exist in our database, create it
         if (!dbPlaylist) {
-          dbPlaylist = await Playlist.create({
-            spotifyPlaylistId: spotifyPlaylist.id,
-            name: spotifyPlaylist.name,
-            description: spotifyPlaylist.description,
-            imageUrl: spotifyPlaylist.images?.[0]?.url || null,
-            ownerId: req.user.id,
-            shareCode: uuidv4(),
+          dbPlaylist = await Playlist.findOrCreate({
+            where: { spotifyPlaylistId: spotifyPlaylist.id },
+            defaults: {
+              spotifyPlaylistId: spotifyPlaylist.id,
+              name: spotifyPlaylist.name,
+              description: spotifyPlaylist.description,
+              imageUrl: spotifyPlaylist.images?.[0]?.url || null,
+              ownerId: req.user.id,
+              shareCode: uuidv4(),
+            },
           });
+          dbPlaylist = dbPlaylist[0]; // findOrCreate returns [instance, created]
         }
 
         return {
