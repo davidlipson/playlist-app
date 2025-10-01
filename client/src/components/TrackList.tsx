@@ -518,12 +518,12 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
         },
       });
 
-        setTrackLikes((prev) => ({
-          ...prev,
-          [track.id]: (prev[track.id] || []).filter(
-            (like) => like.user.id !== user?.id // Remove current user's like
-          ),
-        }));
+      setTrackLikes((prev) => ({
+        ...prev,
+        [track.id]: (prev[track.id] || []).filter(
+          (like) => like.user.id !== user?.id // Remove current user's like
+        ),
+      }));
     } catch (error) {
       console.error("Failed to unlike track:", error);
     } finally {
@@ -535,7 +535,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
     if (!user) return false;
     const likes = trackLikes[track.id] || track.likes || [];
     // Check if the current user has liked this track
-    return likes.some(like => like.user.id === user.id);
+    return likes.some((like) => like.user.id === user.id);
   };
 
   const getLikeAvatars = (track: Track) => {
