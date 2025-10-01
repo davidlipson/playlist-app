@@ -650,6 +650,14 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
 
       // Fetch comments when opening
       fetchTrackComments(trackId);
+      
+      // Focus the input after a short delay to ensure it's rendered
+      setTimeout(() => {
+        const input = document.querySelector(`input[data-track-id="${trackId}"]`) as HTMLInputElement;
+        if (input) {
+          input.focus();
+        }
+      }, 100);
     }
   };
 
@@ -837,9 +845,16 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                   [track.id]: e.target.value,
                 }))
               }
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleCommentSubmit(track.id, e);
+                }
+              }}
               required
               placeholder="Add a comment..."
               className="comment-input"
+              data-track-id={track.id}
               style={{
                 flex: 1,
                 background: "rgba(255, 255, 255, 0.1)",
