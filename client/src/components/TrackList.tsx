@@ -463,6 +463,15 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
     return groups;
   }, [tracks]);
 
+  // Initialize all albums as collapsed when tracks change
+  useEffect(() => {
+    const initialCollapsedState: { [albumId: string]: boolean } = {};
+    Object.keys(albumGroups).forEach((albumId) => {
+      initialCollapsedState[albumId] = true; // Start collapsed
+    });
+    setCollapsedAlbums(initialCollapsedState);
+  }, [albumGroups]);
+
   const toggleAlbumCollapse = (albumId: string) => {
     setCollapsedAlbums((prev) => ({
       ...prev,

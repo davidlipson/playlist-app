@@ -289,15 +289,11 @@ const Dashboard: React.FC = () => {
 
       // Handle specific error cases
       if (errorMessage.includes("Cannot join your own playlist")) {
-        setJoinError(
-          "You cannot join your own playlist. This playlist is already yours!"
-        );
+        setJoinError("You cannot join your own playlist.");
       } else if (
         errorMessage.includes("You have already joined this playlist")
       ) {
-        setJoinError(
-          "You have already joined this playlist. It should appear in your shared playlists."
-        );
+        setJoinError("You have already joined this playlist.");
       } else if (errorMessage.includes("Playlist not found")) {
         setJoinError(
           "Invalid share code. Please check the code and try again."
