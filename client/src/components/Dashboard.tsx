@@ -20,12 +20,6 @@ const Header = styled.header`
   color: white;
 `;
 
-const UserInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 15px;
-`;
-
 const UserName = styled.span`
   font-size: 16px;
   font-weight: 500;
@@ -190,10 +184,8 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardContainer>
       <Header>
-        <UserInfo>
-          <UserName>Welcome, {user?.displayName}</UserName>
-          <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
-        </UserInfo>
+        <UserName>Welcome, {user?.displayName}</UserName>
+        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
       </Header>
 
       <SearchInput
