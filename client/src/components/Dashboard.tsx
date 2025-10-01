@@ -226,9 +226,12 @@ const Dashboard: React.FC = () => {
       setMyPlaylists(response.data.playlists);
     } catch (error: any) {
       console.error("Failed to fetch my playlists:", error);
-      
+
       // Handle token expiration
-      if (error.response?.status === 401 && error.response?.data?.code === "TOKEN_EXPIRED") {
+      if (
+        error.response?.status === 401 &&
+        error.response?.data?.code === "TOKEN_EXPIRED"
+      ) {
         // Redirect to login or show re-authentication message
         alert("Your Spotify connection has expired. Please log in again.");
         logout();
