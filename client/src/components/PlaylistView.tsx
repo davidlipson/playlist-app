@@ -164,13 +164,30 @@ const PlaylistView: React.FC = () => {
   };
 
   const handleCopyShareCode = async () => {
-    if (playlist?.shareCode) {
+    if (playlist?.spotifyId) {
       try {
-        await navigator.clipboard.writeText(playlist.shareCode);
+        // Generate shareable link by calling the backend
+        const response = await axios.get(
+          `/api/playlists/${playlist.spotifyId}/share-link`
+        );
+        const shareLink = response.data.shareLink;
+
+        await navigator.clipboard.writeText(shareLink);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
       } catch (err) {
-        console.error("Failed to copy share code:", err);
+        console.error("Failed to generate share link:", err);
+        // Fallback to copying share code if link generation fails
+        if (playlist?.shareCode) {
+          try {
+            const fallbackLink = `${window.location.origin}/share/${playlist.shareCode}`;
+            await navigator.clipboard.writeText(fallbackLink);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          } catch (fallbackErr) {
+            console.error("Failed to copy fallback share link:", fallbackErr);
+          }
+        }
       }
     }
   };

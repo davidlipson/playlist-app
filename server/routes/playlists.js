@@ -77,15 +77,15 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching playlists:", error);
-    
+
     if (error.message === "SPOTIFY_TOKEN_EXPIRED") {
-      return res.status(401).json({ 
-        error: "Spotify token expired", 
+      return res.status(401).json({
+        error: "Spotify token expired",
         code: "TOKEN_EXPIRED",
-        message: "Please log in again to refresh your Spotify connection"
+        message: "Please log in again to refresh your Spotify connection",
       });
     }
-    
+
     res.status(500).json({ error: "Failed to fetch playlists" });
   }
 });
@@ -322,11 +322,8 @@ router.get("/share/:shareCode", authenticateToken, async (req, res) => {
         sharedWithUserId: req.user.id,
         sharedByUserId: playlist.ownerId,
       });
-    } else {
-      return res
-        .status(400)
-        .json({ error: "You have already joined this playlist" });
     }
+    // If already shared, just return the playlist data (no error)
 
     res.json({
       id: playlist.id,
@@ -343,6 +340,49 @@ router.get("/share/:shareCode", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Error accessing shared playlist:", error);
     res.status(500).json({ error: "Failed to access shared playlist" });
+  }
+});
+
+// Generate shareable link for a playlist
+router.get("/:playlistId/share-link", authenticateToken, async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+
+    // Get or create playlist in our database
+    let playlist = await Playlist.findOne({
+      where: { spotifyPlaylistId: playlistId },
+    });
+
+    if (!playlist) {
+      // Get playlist details from Spotify
+      const spotifyPlaylist = await spotifyService.getPlaylist(
+        req.user.accessToken,
+        playlistId
+      );
+
+      playlist = await Playlist.create({
+        spotifyPlaylistId: playlistId,
+        name: spotifyPlaylist.name,
+        description: spotifyPlaylist.description,
+        imageUrl: spotifyPlaylist.images?.[0]?.url || null,
+        ownerId: req.user.id,
+        shareCode: uuidv4(),
+      });
+    }
+
+    // Generate the shareable link
+    const shareLink = `${req.protocol}://${req.get("host")}/share/${
+      playlist.shareCode
+    }`;
+
+    res.json({
+      success: true,
+      shareLink,
+      shareCode: playlist.shareCode,
+    });
+  } catch (error) {
+    console.error("Error generating share link:", error);
+    res.status(500).json({ error: "Failed to generate share link" });
   }
 });
 
