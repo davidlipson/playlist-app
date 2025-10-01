@@ -108,7 +108,11 @@ router.post("/refresh-token", authenticateToken, async (req, res) => {
       tokenExpiresAt: new Date(Date.now() + tokenData.expires_in * 1000),
     });
 
-    res.json({ success: true });
+    res.json({ 
+      success: true,
+      accessToken: tokenData.access_token,
+      expiresIn: tokenData.expires_in
+    });
   } catch (error) {
     console.error("Token refresh error:", error);
     res.status(500).json({ error: "Token refresh failed" });

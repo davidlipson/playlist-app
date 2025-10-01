@@ -61,36 +61,8 @@ class SpotifyService {
   }
 
   async getUserPlaylists(accessToken, limit = 50, offset = 0) {
-    const response = await axios.get(`${this.baseURL}/me/playlists`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      params: {
-        limit,
-        offset,
-      },
-    });
-
-    return response.data;
-  }
-
-  async getPlaylist(accessToken, playlistId) {
-    const response = await axios.get(
-      `${this.baseURL}/playlists/${playlistId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    return response.data;
-  }
-
-  async getPlaylistTracks(accessToken, playlistId, limit = 100, offset = 0) {
-    const response = await axios.get(
-      `${this.baseURL}/playlists/${playlistId}/tracks`,
-      {
+    try {
+      const response = await axios.get(`${this.baseURL}/me/playlists`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -98,10 +70,59 @@ class SpotifyService {
           limit,
           offset,
         },
-      }
-    );
+      });
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error("SPOTIFY_TOKEN_EXPIRED");
+      }
+      throw error;
+    }
+  }
+
+  async getPlaylist(accessToken, playlistId) {
+    try {
+      const response = await axios.get(
+        `${this.baseURL}/playlists/${playlistId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error("SPOTIFY_TOKEN_EXPIRED");
+      }
+      throw error;
+    }
+  }
+
+  async getPlaylistTracks(accessToken, playlistId, limit = 100, offset = 0) {
+    try {
+      const response = await axios.get(
+        `${this.baseURL}/playlists/${playlistId}/tracks`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          params: {
+            limit,
+            offset,
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error("SPOTIFY_TOKEN_EXPIRED");
+      }
+      throw error;
+    }
   }
 
   async getTrack(accessToken, trackId) {

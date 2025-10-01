@@ -77,6 +77,15 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching playlists:", error);
+    
+    if (error.message === "SPOTIFY_TOKEN_EXPIRED") {
+      return res.status(401).json({ 
+        error: "Spotify token expired", 
+        code: "TOKEN_EXPIRED",
+        message: "Please log in again to refresh your Spotify connection"
+      });
+    }
+    
     res.status(500).json({ error: "Failed to fetch playlists" });
   }
 });

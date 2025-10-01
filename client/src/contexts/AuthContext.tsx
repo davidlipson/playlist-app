@@ -20,6 +20,7 @@ interface AuthContextType {
   login: (token: string, userData: User) => void;
   logout: () => void;
   getAuthHeaders: () => { Authorization: string } | {};
+  refreshSpotifyToken: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -80,12 +81,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
+  const refreshSpotifyToken = async () => {
+    try {
+      const response = await axios.post("/api/auth/refresh-token");
+      return response.data;
+    } catch (error) {
+      console.error("Failed to refresh Spotify token:", error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     logout,
     getAuthHeaders,
+    refreshSpotifyToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
