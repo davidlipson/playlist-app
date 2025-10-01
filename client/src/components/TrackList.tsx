@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { useSpotify } from "../contexts/SpotifyContext";
+import { useAuth } from "../contexts/AuthContext";
 import { formatDuration } from "../utils/timeUtils";
 import { formatDistanceToNow } from "date-fns";
 // import { Favorite, FavoriteBorder, ModeComment } from "@mui/icons-material";
@@ -422,6 +423,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
   console.log("TrackList component rendering with playlistId:", playlistId);
   const { playTrack, currentTrack, isPlaying, position, getCurrentState } =
     useSpotify();
+  const { user } = useAuth();
   const [trackLikes, setTrackLikes] = useState<{ [trackId: string]: Like[] }>(
     {}
   );
@@ -516,12 +518,12 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
         },
       });
 
-      setTrackLikes((prev) => ({
-        ...prev,
-        [track.id]: (prev[track.id] || []).filter(
-          (like) => !like.user.id // Remove current user's like (we'll need to get current user ID)
-        ),
-      }));
+        setTrackLikes((prev) => ({
+          ...prev,
+          [track.id]: (prev[track.id] || []).filter(
+            (like) => like.user.id !== user?.id // Remove current user's like
+          ),
+        }));
     } catch (error) {
       console.error("Failed to unlike track:", error);
     } finally {
@@ -530,9 +532,10 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
   };
 
   const isTrackLiked = (track: Track) => {
+    if (!user) return false;
     const likes = trackLikes[track.id] || track.likes || [];
-    // For now, just check if there are any likes - we'll need current user context
-    return likes.length > 0;
+    // Check if the current user has liked this track
+    return likes.some(like => like.user.id === user.id);
   };
 
   const getLikeAvatars = (track: Track) => {
