@@ -18,6 +18,14 @@ const sequelize = new Sequelize(
           idle: 10000,
         }
       : undefined,
+    dialectOptions: process.env.DATABASE_URL?.includes("postgresql")
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : undefined,
   }
 );
 
