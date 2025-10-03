@@ -213,7 +213,11 @@ router.get("/:playlistId", authenticateToken, async (req, res) => {
       ? await SharedPlaylist.findAll({
           where: { playlistId: playlist.id },
           include: [
-            { model: User, as: "sharedWithUser", attributes: ["id", "displayName"] },
+            {
+              model: User,
+              as: "sharedWithUser",
+              attributes: ["id", "displayName"],
+            },
           ],
         })
       : [];
@@ -384,7 +388,11 @@ router.get("/share/:shareCode", authenticateToken, async (req, res) => {
     const collaborators = await SharedPlaylist.findAll({
       where: { playlistId: playlist.id },
       include: [
-        { model: User, as: "sharedWithUser", attributes: ["id", "displayName"] },
+        {
+          model: User,
+          as: "sharedWithUser",
+          attributes: ["id", "displayName"],
+        },
       ],
     });
 

@@ -6,7 +6,6 @@ const UserListContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 12px 0;
   flex-wrap: wrap;
 `;
 
