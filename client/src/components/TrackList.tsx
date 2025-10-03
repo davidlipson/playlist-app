@@ -205,6 +205,20 @@ const LikeAvatars = styled.div`
   margin-left: 8px;
 `;
 
+const LikeAvatar = styled.div`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1db954;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+`;
+
 const NowPlayingContainer = styled.div`
   position: fixed;
   bottom: 0;
@@ -472,6 +486,17 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
     setCollapsedAlbums(initialCollapsedState);
   }, [albumGroups]);
 
+  // Initialize track likes from server data
+  useEffect(() => {
+    const initialLikes: { [trackId: string]: Like[] } = {};
+    tracks.forEach((track) => {
+      if (track.likes && track.likes.length > 0) {
+        initialLikes[track.id] = track.likes;
+      }
+    });
+    setTrackLikes(initialLikes);
+  }, [tracks]);
+
   const toggleAlbumCollapse = (albumId: string) => {
     setCollapsedAlbums((prev) => ({
       ...prev,
@@ -549,6 +574,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
   };
 
   const getLikeAvatars = (track: Track) => {
+    // Use local state if available, otherwise fall back to track.likes from server
     const likes = trackLikes[track.id] || track.likes || [];
     return likes.slice(0, 3).map((like, index) => (
       <LikeAvatar key={like.id} title={like.user.displayName}>
