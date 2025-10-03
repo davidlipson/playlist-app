@@ -268,6 +268,7 @@ const PlaylistView: React.FC = () => {
           tracks={playlist.tracks}
           playlistId={playlist.id}
           collaborators={playlist.collaborators}
+          playlistOwner={playlist.owner}
         />
       </Content>
     </PlaylistContainer>

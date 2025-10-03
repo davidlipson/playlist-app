@@ -137,9 +137,16 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
       <CardContent>
         <PlaylistName>{playlist.name}</PlaylistName>
 
-        {playlist.collaborators && playlist.collaborators.length > 0 && (
-          <UserList users={playlist.collaborators} variant="small" />
-        )}
+        {(() => {
+          // Combine owner and collaborators
+          const allUsers = [
+            { id: playlist.owner.id, displayName: playlist.owner.displayName },
+            ...(playlist.collaborators || []),
+          ];
+          return (
+            allUsers.length > 0 && <UserList users={allUsers} variant="small" />
+          );
+        })()}
 
         <PlaylistMeta>
           <Owner>by {playlist.owner.displayName}</Owner>

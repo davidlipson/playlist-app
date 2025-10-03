@@ -445,12 +445,17 @@ interface TrackListProps {
     id: string;
     displayName: string;
   }[];
+  playlistOwner?: {
+    id: string;
+    displayName: string;
+  };
 }
 
 const TrackList: React.FC<TrackListProps> = ({
   tracks,
   playlistId,
   collaborators,
+  playlistOwner,
 }) => {
   console.log("TrackList component rendering with playlistId:", playlistId);
   const { playTrack, currentTrack, isPlaying, position, getCurrentState } =
@@ -1235,9 +1240,21 @@ const TrackList: React.FC<TrackListProps> = ({
               </ToggleSwitch>
               <ToggleLabel isActive={showAlbumView}>Album View</ToggleLabel>
             </ToggleContainer>
-            {collaborators && collaborators.length > 0 && (
-              <UserList users={collaborators} variant="large" />
-            )}
+            {(() => {
+              // Combine owner and collaborators
+              const allUsers = [];
+              if (playlistOwner) {
+                allUsers.push(playlistOwner);
+              }
+              if (collaborators && collaborators.length > 0) {
+                allUsers.push(...collaborators);
+              }
+              return (
+                allUsers.length > 0 && (
+                  <UserList users={allUsers} variant="large" />
+                )
+              );
+            })()}
           </div>
         </ViewToggle>
 
