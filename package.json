@@ -10,7 +10,8 @@
     "build": "cd client && npm install && npm run build",
     "build:client": "cd client && npm install && npm run build",
     "start": "node server/index.js",
-    "heroku-postbuild": "cd client && npm install && npm run build"
+    "heroku-postbuild": "cd client && npm install && npm run build",
+    "migrate": "node -e \"require('./server/config/database').getQueryInterface().addColumn('comments', 'inSongTimestamp', { type: require('sequelize').DataTypes.INTEGER, allowNull: true }).then(() => console.log('Migration completed')).catch(err => console.log('Migration already applied or error:', err.message))\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

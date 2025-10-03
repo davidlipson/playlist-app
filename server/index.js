@@ -71,6 +71,22 @@ async function startServer() {
     await sequelize.authenticate();
     console.log("Database connection established successfully.");
 
+    // Run migrations
+    try {
+      await sequelize.getQueryInterface().addColumn('comments', 'inSongTimestamp', {
+        type: sequelize.constructor.DataTypes.INTEGER,
+        allowNull: true,
+        comment: 'Timestamp in seconds when user clicked comment button while listening to the song'
+      });
+      console.log("Migration: inSongTimestamp column added to comments table");
+    } catch (migrationError) {
+      if (migrationError.message.includes('already exists') || migrationError.message.includes('duplicate column')) {
+        console.log("Migration: inSongTimestamp column already exists, skipping...");
+      } else {
+        console.log("Migration error (non-critical):", migrationError.message);
+      }
+    }
+
     // Sync database models
     await sequelize.sync({ force: false });
     console.log("Database models synchronized.");
