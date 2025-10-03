@@ -73,7 +73,19 @@ const Owner = styled.span`
   font-weight: 500;
 `;
 
+const EngagementStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
 const CommentCount = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const LikeCount = styled.span`
   display: flex;
   align-items: center;
   gap: 4px;
@@ -102,6 +114,7 @@ interface Playlist {
   isPublic: boolean;
   shareCode: string;
   commentCount: number;
+  likeCount: number;
   createdAt: string;
 }
 
@@ -130,7 +143,10 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
 
       <PlaylistMeta>
         <Owner>by {playlist.owner.displayName}</Owner>
-        <CommentCount>💬 {playlist.commentCount}</CommentCount>
+        <EngagementStats>
+          <CommentCount>💬 {playlist.commentCount}</CommentCount>
+          <LikeCount>❤️ {playlist.likeCount}</LikeCount>
+        </EngagementStats>
       </PlaylistMeta>
     </Card>
   );
