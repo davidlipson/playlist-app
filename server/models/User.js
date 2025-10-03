@@ -34,6 +34,11 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    lastNotificationCheck: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     tableName: "users",

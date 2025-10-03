@@ -25,6 +25,46 @@ const UserName = styled.span`
   font-weight: 500;
 `;
 
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const NotificationButton = styled.button<{ hasNotifications: boolean }>`
+  background: ${props => props.hasNotifications ? '#1db954' : 'rgba(255, 255, 255, 0.2)'};
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background: ${props => props.hasNotifications ? '#1ed760' : 'rgba(255, 255, 255, 0.3)'};
+  }
+`;
+
+const NotificationBadge = styled.span`
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+`;
+
 const LogoutButton = styled.button`
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -86,6 +126,7 @@ const Dashboard: React.FC = () => {
   const [sharedPlaylists, setSharedPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notificationCount, setNotificationCount] = useState(0);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -120,10 +161,29 @@ const Dashboard: React.FC = () => {
     }
   }, []);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const response = await axios.get("/api/auth/notifications");
+      setNotificationCount(response.data.count);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  }, []);
+
+  const markNotificationsAsRead = useCallback(async () => {
+    try {
+      await axios.post("/api/auth/notifications/read");
+      setNotificationCount(0);
+    } catch (error) {
+      console.error("Failed to mark notifications as read:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMyPlaylists();
     fetchSharedPlaylists();
-  }, [fetchMyPlaylists, fetchSharedPlaylists]);
+    fetchNotifications();
+  }, [fetchMyPlaylists, fetchSharedPlaylists, fetchNotifications]);
 
   const handlePlaylistClick = (playlist: Playlist) => {
     if (playlist.id) {
@@ -185,7 +245,18 @@ const Dashboard: React.FC = () => {
     <DashboardContainer>
       <Header>
         <UserName>Welcome, {user?.displayName}</UserName>
-        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+        <HeaderActions>
+          <NotificationButton 
+            hasNotifications={notificationCount > 0}
+            onClick={markNotificationsAsRead}
+          >
+            🔔 Notifications
+            {notificationCount > 0 && (
+              <NotificationBadge>{notificationCount}</NotificationBadge>
+            )}
+          </NotificationButton>
+          <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+        </HeaderActions>
       </Header>
 
       <SearchInput

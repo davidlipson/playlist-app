@@ -1022,7 +1022,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
       </TrackListContainer>
 
       {/* Now Playing Component */}
-      {(currentTrack || true) && (
+      {currentTrack && (
         <NowPlayingContainer>
           <ProgressContainer>
             <TimeDisplay>

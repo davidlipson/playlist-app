@@ -1,6 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const { User } = require("../models");
+const { User, Playlist, Comment, Like, SharedPlaylist } = require("../models");
 const spotifyService = require("../services/spotifyService");
 const { authenticateToken } = require("../middleware/auth");
 
@@ -116,6 +116,72 @@ router.post("/refresh-token", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Token refresh error:", error);
     res.status(500).json({ error: "Token refresh failed" });
+  }
+});
+
+// Get notification count
+router.get("/notifications", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const lastCheck = req.user.lastNotificationCheck || new Date(0); // If never checked, use epoch
+
+    // Get all playlists the user owns or has access to
+    const userPlaylists = await Playlist.findAll({
+      where: { ownerId: userId },
+      attributes: ['id']
+    });
+
+    const sharedPlaylists = await SharedPlaylist.findAll({
+      where: { sharedWithUserId: userId },
+      include: [{ model: Playlist, as: 'playlist', attributes: ['id'] }]
+    });
+
+    const allPlaylistIds = [
+      ...userPlaylists.map(p => p.id),
+      ...sharedPlaylists.map(sp => sp.playlist.id)
+    ];
+
+    if (allPlaylistIds.length === 0) {
+      return res.json({ count: 0 });
+    }
+
+    // Count new comments and likes since last check
+    const newComments = await Comment.count({
+      where: {
+        playlistId: allPlaylistIds,
+        userId: { [require('sequelize').Op.ne]: userId }, // Exclude user's own comments
+        createdAt: { [require('sequelize').Op.gt]: lastCheck }
+      }
+    });
+
+    const newLikes = await Like.count({
+      where: {
+        playlistId: allPlaylistIds,
+        userId: { [require('sequelize').Op.ne]: userId }, // Exclude user's own likes
+        createdAt: { [require('sequelize').Op.gt]: lastCheck }
+      }
+    });
+
+    const totalNotifications = newComments + newLikes;
+
+    res.json({ count: totalNotifications });
+  } catch (error) {
+    console.error("Error getting notifications:", error);
+    res.status(500).json({ error: "Failed to get notifications" });
+  }
+});
+
+// Mark notifications as read
+router.post("/notifications/read", authenticateToken, async (req, res) => {
+  try {
+    await req.user.update({
+      lastNotificationCheck: new Date()
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error marking notifications as read:", error);
+    res.status(500).json({ error: "Failed to mark notifications as read" });
   }
 });
 
