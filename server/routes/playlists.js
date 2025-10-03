@@ -208,6 +208,16 @@ router.get("/:playlistId", authenticateToken, async (req, res) => {
       });
     });
 
+    // Get collaborators for this playlist
+    const collaborators = playlist
+      ? await SharedPlaylist.findAll({
+          where: { playlistId: playlist.id },
+          include: [
+            { model: User, as: "sharedWithUser", attributes: ["id", "displayName"] },
+          ],
+        })
+      : [];
+
     const result = {
       id: playlist?.id || null,
       spotifyId: spotifyPlaylist.id,
@@ -218,6 +228,10 @@ router.get("/:playlistId", authenticateToken, async (req, res) => {
         id: spotifyPlaylist.owner.id,
         displayName: spotifyPlaylist.owner.display_name,
       },
+      collaborators: collaborators.map((collab) => ({
+        id: collab.sharedWithUser.id,
+        displayName: collab.sharedWithUser.displayName,
+      })),
       tracks: tracksData.items.map((item) => ({
         id: item.track.id,
         name: item.track.name,
@@ -366,6 +380,14 @@ router.get("/share/:shareCode", authenticateToken, async (req, res) => {
       include: [{ model: User, as: "user", attributes: ["id", "displayName"] }],
     });
 
+    // Get collaborators for this playlist
+    const collaborators = await SharedPlaylist.findAll({
+      where: { playlistId: playlist.id },
+      include: [
+        { model: User, as: "sharedWithUser", attributes: ["id", "displayName"] },
+      ],
+    });
+
     res.json({
       id: playlist.id,
       spotifyId: playlist.spotifyPlaylistId,
@@ -376,6 +398,10 @@ router.get("/share/:shareCode", authenticateToken, async (req, res) => {
         id: playlist.owner.id,
         displayName: playlist.owner.displayName,
       },
+      collaborators: collaborators.map((collab) => ({
+        id: collab.sharedWithUser.id,
+        displayName: collab.sharedWithUser.displayName,
+      })),
       tracks: tracksData.items.map((item) => ({
         id: item.track.id,
         name: item.track.name,
