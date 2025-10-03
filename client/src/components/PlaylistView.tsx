@@ -264,11 +264,7 @@ const PlaylistView: React.FC = () => {
       </PageHeader>
 
       {playlist.collaborators && playlist.collaborators.length > 0 && (
-        <UserList
-          users={playlist.collaborators}
-          maxDisplay={5}
-          title="Collaborators:"
-        />
+        <UserList users={playlist.collaborators} maxDisplay={5} />
       )}
 
       <Content>

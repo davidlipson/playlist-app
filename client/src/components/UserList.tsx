@@ -30,12 +30,6 @@ const UserAvatar = styled.div`
   }
 `;
 
-const UserName = styled.span`
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
-  font-weight: 500;
-`;
-
 interface User {
   id: string;
   displayName: string;
@@ -44,16 +38,9 @@ interface User {
 interface UserListProps {
   users: User[];
   maxDisplay?: number;
-  showNames?: boolean;
-  title?: string;
 }
 
-const UserList: React.FC<UserListProps> = ({ 
-  users, 
-  maxDisplay = 5, 
-  showNames = false,
-  title 
-}) => {
+const UserList: React.FC<UserListProps> = ({ users, maxDisplay = 5 }) => {
   if (!users || users.length === 0) {
     return null;
   }
@@ -63,12 +50,8 @@ const UserList: React.FC<UserListProps> = ({
 
   return (
     <UserListContainer>
-      {title && <UserName>{title}</UserName>}
       {displayUsers.map((user) => (
-        <UserAvatar 
-          key={user.id} 
-          title={user.displayName}
-        >
+        <UserAvatar key={user.id} title={user.displayName}>
           {user.displayName.charAt(0).toUpperCase()}
         </UserAvatar>
       ))}
