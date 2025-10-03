@@ -43,10 +43,13 @@ const PlaylistImage = styled.img`
 `;
 
 const PlaylistName = styled.h3`
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
   margin-bottom: 8px;
   line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const CardContent = styled.div`
