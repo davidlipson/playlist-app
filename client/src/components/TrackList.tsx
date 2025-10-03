@@ -676,7 +676,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    if (!confirm("Are you sure you want to delete this comment?")) return;
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
 
     try {
       await axios.delete(`/api/comments/${commentId}`);
