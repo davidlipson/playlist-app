@@ -55,8 +55,15 @@ router.get(
 // Add a comment
 router.post("/", authenticateToken, async (req, res) => {
   try {
-    const { playlistId, trackId, trackName, artistName, timestamp, content } =
-      req.body;
+    const {
+      playlistId,
+      trackId,
+      trackName,
+      artistName,
+      timestamp,
+      inSongTimestamp,
+      content,
+    } = req.body;
 
     if (
       !playlistId ||
@@ -82,6 +89,7 @@ router.post("/", authenticateToken, async (req, res) => {
       trackName,
       artistName,
       timestamp: parseInt(timestamp),
+      inSongTimestamp: inSongTimestamp ? parseInt(inSongTimestamp) : null,
       content: content.trim(),
     });
 

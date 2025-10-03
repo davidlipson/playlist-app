@@ -42,6 +42,12 @@ const Comment = sequelize.define(
       allowNull: false,
       comment: "Timestamp in seconds within the track",
     },
+    inSongTimestamp: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment:
+        "Timestamp in seconds when user clicked comment button while listening to the song",
+    },
     content: {
       type: DataTypes.TEXT,
       allowNull: false,

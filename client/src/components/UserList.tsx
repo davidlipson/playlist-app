@@ -62,7 +62,7 @@ const UserList: React.FC<UserListProps> = ({
   }
 
   // Set default maxDisplay based on variant
-  const defaultMaxDisplay = variant === "large" ? 5 : 2;
+  const defaultMaxDisplay = variant === "large" ? 5 : 3;
   const finalMaxDisplay = maxDisplay || defaultMaxDisplay;
 
   const displayUsers = users.slice(0, finalMaxDisplay);

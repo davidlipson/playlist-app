@@ -88,6 +88,7 @@ interface Comment {
   trackName: string;
   artistName: string;
   timestamp: number;
+  inSongTimestamp?: number | null;
   content: string;
   user: {
     id: string;

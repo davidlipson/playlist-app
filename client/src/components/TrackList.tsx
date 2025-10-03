@@ -494,6 +494,9 @@ const TrackList: React.FC<TrackListProps> = ({
   }>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [capturedTimestamps, setCapturedTimestamps] = useState<{
+    [trackId: string]: number;
+  }>({});
 
   // Group tracks by album
   const albumGroups = useMemo(() => {
@@ -684,10 +687,17 @@ const TrackList: React.FC<TrackListProps> = ({
             ?.artists.map((a) => a.name)
             .join(", ") || "",
         timestamp: 0,
+        inSongTimestamp: capturedTimestamps[trackId] || null,
         content,
       });
 
       setCommentFormData((prev) => ({ ...prev, [trackId]: "" }));
+      // Clear the captured timestamp after submitting
+      setCapturedTimestamps((prev) => {
+        const newState = { ...prev };
+        delete newState[trackId];
+        return newState;
+      });
       // Refresh all comments to show the new one
       await fetchAllComments();
     } catch (error) {
@@ -778,6 +788,15 @@ const TrackList: React.FC<TrackListProps> = ({
         newState[trackId] = true;
         return newState;
       });
+
+      // Capture current track position if user is listening to this track
+      if (currentTrack && currentTrack.id === trackId && isPlaying) {
+        const currentPositionSeconds = Math.floor(position / 1000);
+        setCapturedTimestamps((prev) => ({
+          ...prev,
+          [trackId]: currentPositionSeconds,
+        }));
+      }
 
       // Fetch comments when opening
       fetchTrackComments(trackId);
@@ -900,9 +919,17 @@ const TrackList: React.FC<TrackListProps> = ({
                 e.stopPropagation();
                 toggleCommentForm(track.id);
               }}
-              title="Toggle comments"
+              title={
+                capturedTimestamps[track.id]
+                  ? `Comment will be timestamped at ${Math.floor(
+                      capturedTimestamps[track.id] / 60
+                    )}:${(capturedTimestamps[track.id] % 60)
+                      .toString()
+                      .padStart(2, "0")}`
+                  : "Toggle comments"
+              }
             >
-              💬
+              {capturedTimestamps[track.id] ? "⏰" : "💬"}
             </CommentButton>
           </TrackLikesButtons>
           <UserList users={getLikeUsers(track)} variant="small" />
@@ -1148,70 +1175,88 @@ const TrackList: React.FC<TrackListProps> = ({
 
         {/* Comment Form */}
         {showForm && (
-          <form
-            onSubmit={(e) => handleCommentSubmit(track.id, e)}
-            style={{
-              marginTop: "10px",
-              marginBottom: "10px",
-              display: "flex",
-              gap: "10px",
-              alignItems: "center",
-              paddingLeft: "115px",
-              paddingRight: "20px",
-            }}
-          >
-            <input
-              type="text"
-              value={commentFormData[track.id] || ""}
-              onChange={(e) =>
-                setCommentFormData((prev) => ({
-                  ...prev,
-                  [track.id]: e.target.value,
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleCommentSubmit(track.id, e);
-                }
-              }}
-              required
-              placeholder="Add a comment..."
-              className="comment-input"
-              data-track-id={track.id}
+          <div style={{ paddingLeft: "115px", paddingRight: "20px" }}>
+            {capturedTimestamps[track.id] && (
+              <div
+                style={{
+                  color: "rgba(255, 255, 255, 0.8)",
+                  fontSize: "12px",
+                  marginBottom: "5px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                }}
+              >
+                ⏰ Comment will be timestamped at{" "}
+                {Math.floor(capturedTimestamps[track.id] / 60)}:
+                {(capturedTimestamps[track.id] % 60)
+                  .toString()
+                  .padStart(2, "0")}
+              </div>
+            )}
+            <form
+              onSubmit={(e) => handleCommentSubmit(track.id, e)}
               style={{
-                flex: 1,
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                borderRadius: "8px",
-                padding: "10px 10px 10px 10px",
-                color: "white",
-                fontFamily: "inherit",
-                fontSize: "14px",
-                outline: "none",
-              }}
-            />
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              style={{
-                background: isSubmitting
-                  ? "rgba(255, 255, 255, 0.2)"
-                  : "#1db954",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                padding: "10px 16px",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-                fontWeight: "600",
-                fontSize: "14px",
-                transition: "background 0.2s ease",
-                whiteSpace: "nowrap",
+                marginTop: "10px",
+                marginBottom: "10px",
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
               }}
             >
-              {isSubmitting ? "..." : "Add"}
-            </button>
-          </form>
+              <input
+                type="text"
+                value={commentFormData[track.id] || ""}
+                onChange={(e) =>
+                  setCommentFormData((prev) => ({
+                    ...prev,
+                    [track.id]: e.target.value,
+                  }))
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleCommentSubmit(track.id, e);
+                  }
+                }}
+                required
+                placeholder="Add a comment..."
+                className="comment-input"
+                data-track-id={track.id}
+                style={{
+                  flex: 1,
+                  background: "rgba(255, 255, 255, 0.1)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "8px",
+                  padding: "10px 10px 10px 10px",
+                  color: "white",
+                  fontFamily: "inherit",
+                  fontSize: "14px",
+                  outline: "none",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{
+                  background: isSubmitting
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "#1db954",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "10px 16px",
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                  fontWeight: "600",
+                  fontSize: "14px",
+                  transition: "background 0.2s ease",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {isSubmitting ? "..." : "Add"}
+              </button>
+            </form>
+          </div>
         )}
       </div>
     );
