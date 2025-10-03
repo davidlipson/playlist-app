@@ -74,21 +74,12 @@ const NotificationDropdown = styled.div`
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   min-width: 300px;
   max-width: 400px;
-  max-height: 400px;
-  overflow-y: auto;
   z-index: 1000;
   margin-top: 8px;
 `;
 
-const NotificationHeader = styled.div`
-  padding: 16px;
-  border-bottom: 1px solid #eee;
-  font-weight: 600;
-  color: #333;
-`;
-
 const NotificationItem = styled.div`
-  padding: 12px 16px;
+  padding: 16px;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -105,25 +96,7 @@ const NotificationItem = styled.div`
 const NotificationText = styled.div`
   font-size: 14px;
   color: #333;
-  margin-bottom: 4px;
-`;
-
-const NotificationMeta = styled.div`
-  font-size: 12px;
-  color: #666;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const NotificationType = styled.span<{ type: string }>`
-  background: ${(props) => (props.type === "comment" ? "#1db954" : "#ff6b6b")};
-  color: white;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
+  line-height: 1.4;
 `;
 
 const EmptyNotifications = styled.div`
@@ -188,6 +161,30 @@ interface Playlist {
   likeCount: number;
   createdAt: string;
 }
+
+const getTimeAgo = (date: Date): string => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds} seconds ago`;
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  } else if (diffInSeconds < 2592000) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} day${days === 1 ? '' : 's'} ago`;
+  } else if (diffInSeconds < 31536000) {
+    const months = Math.floor(diffInSeconds / 2592000);
+    return `${months} month${months === 1 ? '' : 's'} ago`;
+  } else {
+    const years = Math.floor(diffInSeconds / 31536000);
+    return `${years} year${years === 1 ? '' : 's'} ago`;
+  }
+};
 
 const Dashboard: React.FC = () => {
   const [myPlaylists, setMyPlaylists] = useState<Playlist[]>([]);
@@ -353,33 +350,26 @@ const Dashboard: React.FC = () => {
             </NotificationButton>
             {showNotifications && (
               <NotificationDropdown data-notification-dropdown>
-                <NotificationHeader>Recent Activity</NotificationHeader>
                 {recentActivity.length > 0 ? (
-                  recentActivity.map((activity, index) => (
-                    <NotificationItem key={index}>
-                      <NotificationText>
-                        <strong>{activity.user}</strong>{" "}
-                        {activity.type === "comment" ? "commented on" : "liked"}{" "}
-                        "{activity.track}" in{" "}
-                        <strong>{activity.playlist}</strong>
-                        {activity.type === "comment" && activity.content && (
-                          <div
-                            style={{ fontStyle: "italic", marginTop: "4px" }}
-                          >
-                            "{activity.content}"
-                          </div>
-                        )}
-                      </NotificationText>
-                      <NotificationMeta>
-                        <NotificationType type={activity.type}>
-                          {activity.type}
-                        </NotificationType>
-                        <span>
-                          {new Date(activity.createdAt).toLocaleDateString()}
-                        </span>
-                      </NotificationMeta>
-                    </NotificationItem>
-                  ))
+                  recentActivity.slice(0, 5).map((activity, index) => {
+                    const timeAgo = getTimeAgo(new Date(activity.createdAt));
+                    return (
+                      <NotificationItem key={index}>
+                        <NotificationText>
+                          <strong>{activity.user}</strong>{" "}
+                          {activity.type === "comment" ? "commented" : "liked"}{" "}
+                          {activity.type === "comment" && activity.content && (
+                            <>"{activity.content}" on </>
+                          )}
+                          "{activity.track}" in{" "}
+                          <strong>"{activity.playlist}"</strong>{" "}
+                          <span style={{ color: "#666", fontSize: "12px" }}>
+                            {timeAgo}
+                          </span>
+                        </NotificationText>
+                      </NotificationItem>
+                    );
+                  })
                 ) : (
                   <EmptyNotifications>No recent activity</EmptyNotifications>
                 )}
