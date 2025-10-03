@@ -88,8 +88,15 @@ const NotificationItem = styled.div`
     background-color: #f8f9fa;
   }
 
+  &:first-child {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
   &:last-child {
     border-bottom: none;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
   }
 `;
 
@@ -254,23 +261,26 @@ const Dashboard: React.FC = () => {
     }
   }, [showNotifications, notificationCount, markNotificationsAsRead]);
 
-  const handleNotificationItemClick = useCallback((activity: any) => {
-    // Close the notification dropdown
-    setShowNotifications(false);
-    
-    // Navigate to the playlist
-    if (activity.playlistId) {
-      navigate(`/playlist/${activity.playlistId}`);
-    } else {
-      // Fallback: try to find the playlist by name in the current playlists
-      const playlist = [...myPlaylists, ...sharedPlaylists].find(
-        p => p.name === activity.playlist
-      );
-      if (playlist) {
-        navigate(`/playlist/${playlist.id || playlist.spotifyId}`);
+  const handleNotificationItemClick = useCallback(
+    (activity: any) => {
+      // Close the notification dropdown
+      setShowNotifications(false);
+
+      // Navigate to the playlist
+      if (activity.playlistId) {
+        navigate(`/playlist/${activity.playlistId}`);
+      } else {
+        // Fallback: try to find the playlist by name in the current playlists
+        const playlist = [...myPlaylists, ...sharedPlaylists].find(
+          (p) => p.name === activity.playlist
+        );
+        if (playlist) {
+          navigate(`/playlist/${playlist.id || playlist.spotifyId}`);
+        }
       }
-    }
-  }, [navigate, myPlaylists, sharedPlaylists]);
+    },
+    [navigate, myPlaylists, sharedPlaylists]
+  );
 
   useEffect(() => {
     fetchMyPlaylists();
@@ -372,7 +382,7 @@ const Dashboard: React.FC = () => {
                   recentActivity.slice(0, 5).map((activity, index) => {
                     const timeAgo = getTimeAgo(new Date(activity.createdAt));
                     return (
-                      <NotificationItem 
+                      <NotificationItem
                         key={index}
                         onClick={() => handleNotificationItemClick(activity)}
                       >
@@ -383,7 +393,8 @@ const Dashboard: React.FC = () => {
                             <>"{activity.content}" on </>
                           )}
                           "{activity.track}" in{" "}
-                          <strong>"{activity.playlist}"</strong>{" "}
+                          <strong>"{activity.playlist}"</strong>
+                          <br />
                           <span style={{ color: "#666", fontSize: "12px" }}>
                             {timeAgo}
                           </span>
