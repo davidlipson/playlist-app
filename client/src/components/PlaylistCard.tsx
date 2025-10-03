@@ -50,17 +50,6 @@ const PlaylistName = styled.h3`
   line-height: 1.3;
 `;
 
-const PlaylistDescription = styled.p`
-  font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 10px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
-
 const PlaylistMeta = styled.div`
   display: flex;
   justify-content: space-between;
@@ -89,16 +78,6 @@ const LikeCount = styled.span`
   display: flex;
   align-items: center;
   gap: 4px;
-`;
-
-const ShareCode = styled.div`
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-size: 12px;
-  font-family: monospace;
-  word-break: break-all;
 `;
 
 interface Playlist {

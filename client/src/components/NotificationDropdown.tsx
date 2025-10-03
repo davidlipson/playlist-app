@@ -88,7 +88,7 @@ const EmptyNotifications = styled.div`
 const getTimeAgo = (date: Date): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (diffInSeconds < 60) {
     return `${diffInSeconds} seconds ago`;
   } else if (diffInSeconds < 3600) {
@@ -113,8 +113,8 @@ interface NotificationDropdownProps {
   availablePlaylists?: Array<{ id: string; spotifyId: string; name: string }>;
 }
 
-const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ 
-  availablePlaylists = [] 
+const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
+  availablePlaylists = [],
 }) => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
@@ -214,10 +214,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                     <strong>{activity.user}</strong>{" "}
                     {activity.type === "comment" ? "commented" : "liked"}{" "}
                     {activity.type === "comment" && activity.content && (
-                      <>"{activity.content}" on </>
+                      <>
+                        <em>"{activity.content}"</em> on{" "}
+                      </>
                     )}
-                    "{activity.track}" in{" "}
-                    <strong>"{activity.playlist}"</strong>
+                    "{activity.track}" in <strong>{activity.playlist}</strong>
                     <br />
                     <span style={{ color: "#666", fontSize: "12px" }}>
                       {timeAgo}
