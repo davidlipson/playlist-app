@@ -1228,9 +1228,6 @@ const TrackList: React.FC<TrackListProps> = ({
               width: "100%",
             }}
           >
-            {collaborators && collaborators.length > 0 && (
-              <UserList users={collaborators} variant="large" />
-            )}
             <ToggleContainer>
               <ToggleLabel isActive={!showAlbumView}>Song View</ToggleLabel>
               <ToggleSwitch
@@ -1241,6 +1238,9 @@ const TrackList: React.FC<TrackListProps> = ({
               </ToggleSwitch>
               <ToggleLabel isActive={showAlbumView}>Album View</ToggleLabel>
             </ToggleContainer>
+            {collaborators && collaborators.length > 0 && (
+              <UserList users={collaborators} variant="large" />
+            )}
           </div>
         </ViewToggle>
 
