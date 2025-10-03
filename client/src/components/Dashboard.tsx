@@ -111,6 +111,10 @@ interface Playlist {
     id: string;
     displayName: string;
   };
+  collaborators?: {
+    id: string;
+    displayName: string;
+  }[];
   isPublic: boolean;
   shareCode: string;
   commentCount: number;

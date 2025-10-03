@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import UserList from "./UserList";
 
 const Card = styled.div<{ isShared?: boolean }>`
   position: relative;
@@ -90,6 +91,10 @@ interface Playlist {
     id: string;
     displayName: string;
   };
+  collaborators?: {
+    id: string;
+    displayName: string;
+  }[];
   isPublic: boolean;
   shareCode: string;
   commentCount: number;
@@ -119,6 +124,10 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
       </ImageContainer>
 
       <PlaylistName>{playlist.name}</PlaylistName>
+
+      {playlist.collaborators && playlist.collaborators.length > 0 && (
+        <UserList users={playlist.collaborators} maxDisplay={3} />
+      )}
 
       <PlaylistMeta>
         <Owner>by {playlist.owner.displayName}</Owner>

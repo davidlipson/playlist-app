@@ -22,10 +22,12 @@ const UserAvatar = styled.div`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(29, 185, 84, 0.3);
 
   &:hover {
     background: #1ed760;
     transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(29, 185, 84, 0.5);
   }
 `;
 
