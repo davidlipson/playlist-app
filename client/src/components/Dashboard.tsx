@@ -17,8 +17,8 @@ const DashboardContainer = styled.div`
 
 const PlaylistsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 25px;
 `;
 
 const EmptyState = styled.div`

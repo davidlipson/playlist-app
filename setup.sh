@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🎵 Setting up Playlist App..."
+echo "🎵 Setting up vinylclub..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then

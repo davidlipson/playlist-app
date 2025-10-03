@@ -86,7 +86,7 @@ const Login: React.FC = () => {
     <LoginContainer>
       <LoginCard>
         <Logo>🎵</Logo>
-        <Title>Playlist App</Title>
+        <Title>vinylclub</Title>
         <Subtitle>
           Share your Spotify playlists and discover new music with friends
         </Subtitle>

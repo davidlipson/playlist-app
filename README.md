@@ -1,4 +1,4 @@
-# Playlist App
+# vinylclub
 
 A Spotify playlist sharing application that allows users to share their playlists and add timestamped comments. Built with TypeScript, React, Node.js, Express, and PostgreSQL.
 
