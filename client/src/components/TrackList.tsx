@@ -203,7 +203,7 @@ const TrackLikes = styled.div`
 const TrackLikesButtons = styled.div`
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
 `;
 
 const LikeButton = styled.button<{ isLiked: boolean }>`
@@ -402,7 +402,6 @@ const CommentButton = styled.button`
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-left: 8px;
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -876,7 +875,6 @@ const TrackList: React.FC<TrackListProps> = ({
         <TrackLikes>
           <TrackLikesButtons>
             <TrackDuration>{formatDuration(track.duration)}</TrackDuration>
-
             <LikeButton
               isLiked={isTrackLiked(track)}
               onClick={
