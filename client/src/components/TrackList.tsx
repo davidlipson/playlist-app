@@ -16,6 +16,29 @@ const TrackListContainer = styled.div`
   margin-bottom: 90px; /* Add space for the Now Playing component */
 `;
 
+// Add CSS animations for the modal
+const ModalStyles = styled.div`
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+`;
+
 const ViewToggle = styled.div`
   display: flex;
   align-items: center;
@@ -451,6 +474,8 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
   const [showCommentMenus, setShowCommentMenus] = useState<{
     [commentId: string]: boolean;
   }>({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
   // Group tracks by album
   const albumGroups = useMemo(() => {
@@ -676,16 +701,29 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    setCommentToDelete(commentId);
+    setShowDeleteModal(true);
+    setShowCommentMenus({}); // Close any open menus
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete) return;
 
     try {
-      await axios.delete(`/api/comments/${commentId}`);
+      await axios.delete(`/api/comments/${commentToDelete}`);
       // Refresh all comments to remove the deleted one
       await fetchAllComments();
+      setShowDeleteModal(false);
+      setCommentToDelete(null);
     } catch (error) {
       console.error("Failed to delete comment:", error);
       alert("Failed to delete comment. Please try again.");
     }
+  };
+
+  const cancelDeleteComment = () => {
+    setShowDeleteModal(false);
+    setCommentToDelete(null);
   };
 
   const toggleCommentMenu = (commentId: string) => {
@@ -1143,6 +1181,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
 
   return (
     <>
+      <ModalStyles />
       <TrackListContainer>
         <ViewToggle>
           <ToggleContainer>
@@ -1253,6 +1292,113 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
             </NowPlayingTrackName>
           </NowPlayingInfo>
         </NowPlayingContainer>
+      )}
+
+      {/* Delete Comment Modal */}
+      {showDeleteModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10000,
+            animation: "fadeIn 0.2s ease-out",
+          }}
+          onClick={cancelDeleteComment}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "12px",
+              padding: "24px",
+              maxWidth: "400px",
+              width: "90%",
+              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
+              animation: "slideIn 0.2s ease-out",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              style={{
+                margin: "0 0 16px 0",
+                fontSize: "18px",
+                fontWeight: "600",
+                color: "#333",
+              }}
+            >
+              Delete Comment
+            </h3>
+            <p
+              style={{
+                margin: "0 0 24px 0",
+                fontSize: "14px",
+                color: "#666",
+                lineHeight: "1.5",
+              }}
+            >
+              Are you sure you want to delete this comment? This action cannot be undone.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                onClick={cancelDeleteComment}
+                style={{
+                  background: "transparent",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  color: "#666",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#f5f5f5";
+                  e.currentTarget.style.borderColor = "#ccc";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = "#ddd";
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteComment}
+                style={{
+                  background: "#e74c3c",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  color: "white",
+                  fontWeight: "600",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#c0392b";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#e74c3c";
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
