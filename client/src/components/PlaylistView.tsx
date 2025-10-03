@@ -273,7 +273,7 @@ const PlaylistView: React.FC = () => {
           playlistOwner={playlist.owner}
         />
       </Content>
-      <NowPlaying />
+      <NowPlaying currentPlaylistId={playlist.id} />
     </PlaylistContainer>
   );
 };

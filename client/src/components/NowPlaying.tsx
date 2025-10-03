@@ -127,9 +127,10 @@ const CommentTooltip = styled.div<{ isVisible: boolean }>`
 
 interface NowPlayingProps {
   trackComments?: { [trackId: string]: any[] };
+  currentPlaylistId?: string;
 }
 
-const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
+const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {}, currentPlaylistId }) => {
   const { currentTrack, position } = useSpotify();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
@@ -165,18 +166,32 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
         console.log("🎵 No comments in props, fetching from server...");
 
         // Fetch all comments for this track across all playlists
-        console.log("🎵 Making API call to /api/comments/track/" + currentTrack.id + "...");
-        const response = await axios.get(`/api/comments/track/${currentTrack.id}`);
+        console.log(
+          "🎵 Making API call to /api/comments/track/" + currentTrack.id + "..."
+        );
+        const response = await axios.get(
+          `/api/comments/track/${currentTrack.id}`
+        );
         console.log("🎵 API response received:", response.status);
         console.log("🎵 Fetched comments:", response.data.length, "comments");
         console.log("🎵 All comments:", response.data);
+        
+        // Filter comments by current playlist if specified
+        let filteredComments = response.data;
+        if (currentPlaylistId) {
+          filteredComments = response.data.filter(
+            (comment: any) => comment.playlist && comment.playlist.id === currentPlaylistId
+          );
+          console.log("🎵 Filtered to current playlist comments:", filteredComments.length, "comments");
+        }
+        
         console.log(
           "🎵 Comments with inSongTimestamp:",
-          response.data.filter(
+          filteredComments.filter(
             (c: any) => c.inSongTimestamp && c.inSongTimestamp > 0
           )
         );
-        setCurrentTrackComments(response.data);
+        setCurrentTrackComments(filteredComments);
       } catch (error: any) {
         console.error("🎵 Error fetching track comments:", error);
         console.error(
@@ -188,7 +203,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
     };
 
     fetchCurrentTrackComments();
-  }, [currentTrack, trackComments]);
+  }, [currentTrack, trackComments, currentPlaylistId]);
 
   // Get timestamped comments for the current track
   const getTimestampedCommentsForCurrentTrack = () => {
