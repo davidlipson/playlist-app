@@ -190,7 +190,6 @@ const TrackArtists = styled.div`
 const TrackDuration = styled.div`
   color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
-  margin-left: 15px;
 `;
 
 const TrackLikes = styled.div`
@@ -874,10 +873,10 @@ const TrackList: React.FC<TrackListProps> = ({
           </TrackArtists>
         </TrackInfo>
 
-        <TrackDuration>{formatDuration(track.duration)}</TrackDuration>
-
         <TrackLikes>
           <TrackLikesButtons>
+            <TrackDuration>{formatDuration(track.duration)}</TrackDuration>
+
             <LikeButton
               isLiked={isTrackLiked(track)}
               onClick={

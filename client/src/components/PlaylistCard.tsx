@@ -17,6 +17,9 @@ const Card = styled.div<{ isShared?: boolean }>`
   transition: all 0.3s ease;
   color: white;
   border: 2px solid transparent; // Remove green border for shared playlists
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
   &:hover {
     background: ${(props) =>
@@ -51,12 +54,20 @@ const PlaylistName = styled.h3`
   line-height: 1.3;
 `;
 
+const CardContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
 const PlaylistMeta = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
   opacity: 0.7;
+  margin-top: auto;
+  padding-top: 8px;
 `;
 
 const Owner = styled.span`
@@ -123,23 +134,25 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
         )}
       </ImageContainer>
 
-      <PlaylistName>{playlist.name}</PlaylistName>
+      <CardContent>
+        <PlaylistName>{playlist.name}</PlaylistName>
 
-      {playlist.collaborators && playlist.collaborators.length > 0 && (
-        <UserList users={playlist.collaborators} variant="small" />
-      )}
+        {playlist.collaborators && playlist.collaborators.length > 0 && (
+          <UserList users={playlist.collaborators} variant="small" />
+        )}
 
-      <PlaylistMeta>
-        <Owner>by {playlist.owner.displayName}</Owner>
-        <EngagementStats>
-          {playlist.commentCount > 0 && (
-            <CommentCount>💬 {playlist.commentCount}</CommentCount>
-          )}
-          {playlist.likeCount > 0 && (
-            <LikeCount>❤️ {playlist.likeCount}</LikeCount>
-          )}
-        </EngagementStats>
-      </PlaylistMeta>
+        <PlaylistMeta>
+          <Owner>by {playlist.owner.displayName}</Owner>
+          <EngagementStats>
+            {playlist.commentCount > 0 && (
+              <CommentCount>💬 {playlist.commentCount}</CommentCount>
+            )}
+            {playlist.likeCount > 0 && (
+              <LikeCount>❤️ {playlist.likeCount}</LikeCount>
+            )}
+          </EngagementStats>
+        </PlaylistMeta>
+      </CardContent>
     </Card>
   );
 };
