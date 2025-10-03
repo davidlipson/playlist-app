@@ -9,7 +9,6 @@ const Card = styled.div<{ isShared?: boolean }>`
   cursor: pointer;
   transition: all 0.3s ease;
   color: white;
-  border: 2px solid transparent; // Remove green border for shared playlists
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -57,7 +56,6 @@ const PlaylistMeta = styled.div`
   font-size: 12px;
   opacity: 0.7;
   margin-top: auto;
-  padding-top: 8px;
 `;
 
 const EngagementStats = styled.div`
