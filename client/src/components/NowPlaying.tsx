@@ -195,7 +195,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
               console.log("🎵 Looking for track ID:", currentTrack.id);
               console.log(
                 "🎵 Available track IDs:",
-                tracks.map((t) => t.id)
+                tracks.map((t: any) => t.id)
               );
 
               if (tracks.some((track: any) => track.id === currentTrack.id)) {
