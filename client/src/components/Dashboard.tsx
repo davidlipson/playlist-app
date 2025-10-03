@@ -9,6 +9,7 @@ import SearchInput from "./SearchInput";
 import NotificationDropdown from "./NotificationDropdown";
 import LogoutButton from "./LogoutButton";
 import PageHeader from "./PageHeader";
+import NowPlaying from "./NowPlaying";
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -129,7 +130,7 @@ const Dashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showShared, setShowShared] = useState(true);
   const [showPersonal, setShowPersonal] = useState(true);
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const fetchMyPlaylists = useCallback(async () => {
@@ -322,6 +323,7 @@ const Dashboard: React.FC = () => {
           ))}
         </PlaylistsGrid>
       )}
+      <NowPlaying />
     </DashboardContainer>
   );
 };

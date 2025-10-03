@@ -8,6 +8,7 @@ import NotificationDropdown from "./NotificationDropdown";
 import LogoutButton from "./LogoutButton";
 import PageHeader from "./PageHeader";
 import UserList from "./UserList";
+import NowPlaying from "./NowPlaying";
 import { useAuth } from "../contexts/AuthContext";
 
 const PlaylistContainer = styled.div`
@@ -272,6 +273,7 @@ const PlaylistView: React.FC = () => {
           playlistOwner={playlist.owner}
         />
       </Content>
+      <NowPlaying trackComments={trackComments} />
     </PlaylistContainer>
   );
 };
