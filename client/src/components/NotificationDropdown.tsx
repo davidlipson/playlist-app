@@ -46,7 +46,7 @@ const NotificationDropdownContainer = styled.div`
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   min-width: 300px;
   max-width: 400px;
-  z-index: 1000;
+  z-index: 9999;
   margin-top: 8px;
 `;
 
