@@ -164,75 +164,19 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
 
         console.log("🎵 No comments in props, fetching from server...");
 
-        // If not available in props, fetch from server
-        // We need to find which playlist contains this track to get comments
-        console.log("🎵 Making API call to /api/playlists/my-playlists...");
-        const response = await axios.get("/api/playlists/my-playlists");
+        // Fetch all comments for this track across all playlists
+        console.log("🎵 Making API call to /api/comments/track/" + currentTrack.id + "...");
+        const response = await axios.get(`/api/comments/track/${currentTrack.id}`);
         console.log("🎵 API response received:", response.status);
-        const playlists = response.data.playlists;
-        console.log("🎵 Playlists data:", response.data);
-        console.log("🎵 Found", playlists.length, "playlists to check");
+        console.log("🎵 Fetched comments:", response.data.length, "comments");
+        console.log("🎵 All comments:", response.data);
         console.log(
-          "🎵 Playlists:",
-          playlists.map((p: any) => ({
-            name: p.name,
-            id: p.id,
-            spotifyId: p.spotifyPlaylistId,
-          }))
+          "🎵 Comments with inSongTimestamp:",
+          response.data.filter(
+            (c: any) => c.inSongTimestamp && c.inSongTimestamp > 0
+          )
         );
-
-        for (const playlist of playlists) {
-          if (playlist.spotifyPlaylistId) {
-            try {
-              const playlistResponse = await axios.get(
-                `/api/playlists/${playlist.id}`
-              );
-              const tracks = playlistResponse.data.tracks;
-              console.log(
-                "🎵 Checking playlist",
-                playlist.name,
-                "with",
-                tracks.length,
-                "tracks"
-              );
-              console.log("🎵 Looking for track ID:", currentTrack.id);
-              console.log(
-                "🎵 Available track IDs:",
-                tracks.map((t: any) => t.id)
-              );
-
-              if (tracks.some((track: any) => track.id === currentTrack.id)) {
-                console.log(
-                  "🎵 Found playlist containing track:",
-                  playlist.name
-                );
-                // Found the playlist, now get comments for this track
-                const commentsResponse = await axios.get(
-                  `/api/comments/playlist/${playlist.id}/track/${currentTrack.id}`
-                );
-                console.log(
-                  "🎵 Fetched comments:",
-                  commentsResponse.data.length,
-                  "comments"
-                );
-                console.log("🎵 All comments:", commentsResponse.data);
-                console.log(
-                  "🎵 Comments with inSongTimestamp:",
-                  commentsResponse.data.filter(
-                    (c: any) => c.inSongTimestamp && c.inSongTimestamp > 0
-                  )
-                );
-                setCurrentTrackComments(commentsResponse.data);
-                return;
-              }
-            } catch (error) {
-              console.error("Error checking playlist for comments:", error);
-            }
-          }
-        }
-
-        console.log("🎵 No playlist found containing current track");
-        setCurrentTrackComments([]);
+        setCurrentTrackComments(response.data);
       } catch (error: any) {
         console.error("🎵 Error fetching track comments:", error);
         console.error(

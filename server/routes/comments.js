@@ -52,6 +52,31 @@ router.get(
   }
 );
 
+// Get all comments for a specific track ID across all playlists
+router.get("/track/:trackId", authenticateToken, async (req, res) => {
+  try {
+    const { trackId } = req.params;
+
+    const comments = await Comment.findAll({
+      where: { trackId },
+      include: [
+        { model: User, as: "user", attributes: ["id", "displayName"] },
+        { 
+          model: Playlist, 
+          as: "playlist", 
+          attributes: ["id", "name", "spotifyPlaylistId"] 
+        },
+      ],
+      order: [["createdAt", "ASC"]],
+    });
+
+    res.json(comments);
+  } catch (error) {
+    console.error("Error fetching track comments across playlists:", error);
+    res.status(500).json({ error: "Failed to fetch track comments" });
+  }
+});
+
 // Add a comment
 router.post("/", authenticateToken, async (req, res) => {
   try {
