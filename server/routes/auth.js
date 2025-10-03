@@ -119,7 +119,7 @@ router.post("/refresh-token", authenticateToken, async (req, res) => {
   }
 });
 
-// Get notification count
+// Get notification count and recent activity
 router.get("/notifications", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -142,7 +142,7 @@ router.get("/notifications", authenticateToken, async (req, res) => {
     ];
 
     if (allPlaylistIds.length === 0) {
-      return res.json({ count: 0 });
+      return res.json({ count: 0, recentActivity: [] });
     }
 
     // Count new comments and likes since last check
@@ -162,9 +162,58 @@ router.get("/notifications", authenticateToken, async (req, res) => {
       }
     });
 
+    // Get recent activity (last 10 items) for display
+    const recentComments = await Comment.findAll({
+      where: {
+        playlistId: allPlaylistIds,
+        userId: { [require('sequelize').Op.ne]: userId }
+      },
+      include: [
+        { model: User, as: 'user', attributes: ['displayName'] },
+        { model: Playlist, as: 'playlist', attributes: ['name'] }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 5
+    });
+
+    const recentLikes = await Like.findAll({
+      where: {
+        playlistId: allPlaylistIds,
+        userId: { [require('sequelize').Op.ne]: userId }
+      },
+      include: [
+        { model: User, as: 'user', attributes: ['displayName'] },
+        { model: Playlist, as: 'playlist', attributes: ['name'] }
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 5
+    });
+
+    // Combine and sort recent activity
+    const recentActivity = [
+      ...recentComments.map(comment => ({
+        type: 'comment',
+        user: comment.user.displayName,
+        playlist: comment.playlist.name,
+        track: comment.trackName,
+        content: comment.content,
+        createdAt: comment.createdAt
+      })),
+      ...recentLikes.map(like => ({
+        type: 'like',
+        user: like.user.displayName,
+        playlist: like.playlist.name,
+        track: like.trackName,
+        createdAt: like.createdAt
+      }))
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
+
     const totalNotifications = newComments + newLikes;
 
-    res.json({ count: totalNotifications });
+    res.json({ 
+      count: totalNotifications,
+      recentActivity: recentActivity
+    });
   } catch (error) {
     console.error("Error getting notifications:", error);
     res.status(500).json({ error: "Failed to get notifications" });

@@ -32,7 +32,7 @@ const HeaderActions = styled.div`
 `;
 
 const NotificationButton = styled.button<{ hasNotifications: boolean }>`
-  background: ${props => props.hasNotifications ? '#1db954' : 'rgba(255, 255, 255, 0.2)'};
+  background: rgba(255, 255, 255, 0.2);
   color: white;
   border: none;
   border-radius: 25px;
@@ -45,7 +45,7 @@ const NotificationButton = styled.button<{ hasNotifications: boolean }>`
   gap: 8px;
 
   &:hover {
-    background: ${props => props.hasNotifications ? '#1ed760' : 'rgba(255, 255, 255, 0.3)'};
+    background: rgba(255, 255, 255, 0.3);
   }
 `;
 
@@ -63,6 +63,74 @@ const NotificationBadge = styled.span`
   position: absolute;
   top: -5px;
   right: -5px;
+`;
+
+const NotificationDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+  max-width: 400px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 8px;
+`;
+
+const NotificationHeader = styled.div`
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+  color: #333;
+`;
+
+const NotificationItem = styled.div`
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const NotificationText = styled.div`
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+`;
+
+const NotificationMeta = styled.div`
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const NotificationType = styled.span<{ type: string }>`
+  background: ${props => props.type === 'comment' ? '#1db954' : '#ff6b6b'};
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+`;
+
+const EmptyNotifications = styled.div`
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
 `;
 
 const LogoutButton = styled.button`
@@ -127,6 +195,8 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationCount, setNotificationCount] = useState(0);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -165,6 +235,7 @@ const Dashboard: React.FC = () => {
     try {
       const response = await axios.get("/api/auth/notifications");
       setNotificationCount(response.data.count);
+      setRecentActivity(response.data.recentActivity || []);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
     }
@@ -179,11 +250,35 @@ const Dashboard: React.FC = () => {
     }
   }, []);
 
+  const handleNotificationClick = useCallback(() => {
+    setShowNotifications(!showNotifications);
+    if (notificationCount > 0) {
+      markNotificationsAsRead();
+    }
+  }, [showNotifications, notificationCount, markNotificationsAsRead]);
+
   useEffect(() => {
     fetchMyPlaylists();
     fetchSharedPlaylists();
     fetchNotifications();
   }, [fetchMyPlaylists, fetchSharedPlaylists, fetchNotifications]);
+
+  // Close notifications dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showNotifications) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('[data-notification-dropdown]')) {
+          setShowNotifications(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications]);
 
   const handlePlaylistClick = (playlist: Playlist) => {
     if (playlist.id) {
@@ -227,7 +322,7 @@ const Dashboard: React.FC = () => {
       // Calculate total engagement (comments + likes)
       const aEngagement = (a.commentCount || 0) + (a.likeCount || 0);
       const bEngagement = (b.commentCount || 0) + (b.likeCount || 0);
-      
+
       // First sort by total engagement (descending)
       if (bEngagement !== aEngagement) {
         return bEngagement - aEngagement;
@@ -246,15 +341,46 @@ const Dashboard: React.FC = () => {
       <Header>
         <UserName>Welcome, {user?.displayName}</UserName>
         <HeaderActions>
-          <NotificationButton 
-            hasNotifications={notificationCount > 0}
-            onClick={markNotificationsAsRead}
-          >
-            🔔 Notifications
-            {notificationCount > 0 && (
-              <NotificationBadge>{notificationCount}</NotificationBadge>
+          <div style={{ position: 'relative' }}>
+            <NotificationButton
+              hasNotifications={notificationCount > 0}
+              onClick={handleNotificationClick}
+            >
+              🔔 Notifications
+              {notificationCount > 0 && (
+                <NotificationBadge>{notificationCount}</NotificationBadge>
+              )}
+            </NotificationButton>
+            {showNotifications && (
+              <NotificationDropdown data-notification-dropdown>
+                <NotificationHeader>Recent Activity</NotificationHeader>
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity, index) => (
+                    <NotificationItem key={index}>
+                      <NotificationText>
+                        <strong>{activity.user}</strong> {activity.type === 'comment' ? 'commented on' : 'liked'} "{activity.track}" in <strong>{activity.playlist}</strong>
+                        {activity.type === 'comment' && activity.content && (
+                          <div style={{ fontStyle: 'italic', marginTop: '4px' }}>
+                            "{activity.content}"
+                          </div>
+                        )}
+                      </NotificationText>
+                      <NotificationMeta>
+                        <NotificationType type={activity.type}>
+                          {activity.type}
+                        </NotificationType>
+                        <span>{new Date(activity.createdAt).toLocaleDateString()}</span>
+                      </NotificationMeta>
+                    </NotificationItem>
+                  ))
+                ) : (
+                  <EmptyNotifications>
+                    No recent activity
+                  </EmptyNotifications>
+                )}
+              </NotificationDropdown>
             )}
-          </NotificationButton>
+          </div>
           <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
         </HeaderActions>
       </Header>
