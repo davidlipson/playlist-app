@@ -135,7 +135,7 @@ const SpotifyCallback: React.FC = () => {
     };
 
     handleCallback();
-  }, [login, navigate, isProcessing]);
+  }, [login, navigate]);
 
   const handleRetry = () => {
     navigate("/login", { replace: true });
