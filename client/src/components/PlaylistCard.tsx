@@ -126,7 +126,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
       <PlaylistName>{playlist.name}</PlaylistName>
 
       {playlist.collaborators && playlist.collaborators.length > 0 && (
-        <UserList users={playlist.collaborators} maxDisplay={3} />
+        <UserList users={playlist.collaborators} variant="small" />
       )}
 
       <PlaylistMeta>

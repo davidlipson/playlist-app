@@ -882,7 +882,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
           >
             💬
           </CommentButton>
-          <UserList users={getLikeUsers(track)} maxDisplay={3} />
+          <UserList users={getLikeUsers(track)} variant="small" />
         </TrackLikes>
       </TrackItem>
     );
