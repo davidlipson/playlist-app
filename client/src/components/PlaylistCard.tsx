@@ -4,15 +4,8 @@ import UserList from "./UserList";
 
 const Card = styled.div<{ isShared?: boolean }>`
   position: relative;
-  background: ${
-    (props) =>
-      props.isShared
-        ? "rgb(44 249 43 / 36%)" // New green background for shared playlists
-        : "rgba(255, 255, 255, 0.1)" // Default for my playlists
-  };
   backdrop-filter: blur(10px);
   border-radius: 15px;
-  padding: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
   color: white;
@@ -30,7 +23,6 @@ const Card = styled.div<{ isShared?: boolean }>`
 
 const ImageContainer = styled.div`
   width: 100%;
-  height: 200px;
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 15px;
@@ -68,10 +60,6 @@ const PlaylistMeta = styled.div`
   opacity: 0.7;
   margin-top: auto;
   padding-top: 8px;
-`;
-
-const Owner = styled.span`
-  font-weight: 500;
 `;
 
 const EngagementStats = styled.div`
@@ -137,19 +125,22 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
       <CardContent>
         <PlaylistName>{playlist.name}</PlaylistName>
 
-        {(() => {
-          // Combine owner and collaborators
-          const allUsers = [
-            { id: playlist.owner.id, displayName: playlist.owner.displayName },
-            ...(playlist.collaborators || []),
-          ];
-          return (
-            allUsers.length > 0 && <UserList users={allUsers} variant="small" />
-          );
-        })()}
-
         <PlaylistMeta>
-          <Owner>by {playlist.owner.displayName}</Owner>
+          {(() => {
+            // Combine owner and collaborators
+            const allUsers = [
+              {
+                id: playlist.owner.id,
+                displayName: playlist.owner.displayName,
+              },
+              ...(playlist.collaborators || []),
+            ];
+            return (
+              allUsers.length > 0 && (
+                <UserList users={allUsers} variant="small" />
+              )
+            );
+          })()}
           <EngagementStats>
             {playlist.commentCount > 0 && (
               <CommentCount>💬 {playlist.commentCount}</CommentCount>
