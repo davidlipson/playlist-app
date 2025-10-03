@@ -4,8 +4,6 @@ import styled from "styled-components";
 const UserListContainer = styled.div<{ variant: "small" | "large" }>`
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: ${(props) => (props.variant === "large" ? "12px 0" : "8px 0")};
   flex-wrap: wrap;
 
   /* Overlapping avatars */
