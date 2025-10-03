@@ -260,16 +260,15 @@ const PlaylistView: React.FC = () => {
           </>
         }
       >
-        <div>
-          <h1>{playlist.name}</h1>
-          {playlist.collaborators && playlist.collaborators.length > 0 && (
-            <UserList users={playlist.collaborators} variant="large" />
-          )}
-        </div>
+        <h1>{playlist.name}</h1>
       </PageHeader>
 
       <Content>
-        <TrackList tracks={playlist.tracks} playlistId={playlist.id} />
+        <TrackList
+          tracks={playlist.tracks}
+          playlistId={playlist.id}
+          collaborators={playlist.collaborators}
+        />
       </Content>
     </PlaylistContainer>
   );

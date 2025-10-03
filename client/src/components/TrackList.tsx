@@ -195,9 +195,16 @@ const TrackDuration = styled.div`
 
 const TrackLikes = styled.div`
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  margin-left: 15px;
+`;
+
+const TrackLikesButtons = styled.div`
+  display: flex;
   align-items: center;
   gap: 5px;
-  margin-left: 15px;
 `;
 
 const LikeButton = styled.button<{ isLiked: boolean }>`
@@ -436,9 +443,17 @@ interface Track {
 interface TrackListProps {
   tracks: Track[];
   playlistId: string;
+  collaborators?: {
+    id: string;
+    displayName: string;
+  }[];
 }
 
-const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
+const TrackList: React.FC<TrackListProps> = ({
+  tracks,
+  playlistId,
+  collaborators,
+}) => {
   console.log("TrackList component rendering with playlistId:", playlistId);
   const { playTrack, currentTrack, isPlaying, position, getCurrentState } =
     useSpotify();
@@ -862,26 +877,32 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
         <TrackDuration>{formatDuration(track.duration)}</TrackDuration>
 
         <TrackLikes>
-          <LikeButton
-            isLiked={isTrackLiked(track)}
-            onClick={
-              isTrackLiked(track)
-                ? (e) => handleUnlikeTrack(track, e)
-                : (e) => handleLikeTrack(track, e)
-            }
-            disabled={likingTracks[track.id]}
-          >
-            {likingTracks[track.id] ? "..." : isTrackLiked(track) ? "❤️" : "🤍"}
-          </LikeButton>
-          <CommentButton
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleCommentForm(track.id);
-            }}
-            title="Toggle comments"
-          >
-            💬
-          </CommentButton>
+          <TrackLikesButtons>
+            <LikeButton
+              isLiked={isTrackLiked(track)}
+              onClick={
+                isTrackLiked(track)
+                  ? (e) => handleUnlikeTrack(track, e)
+                  : (e) => handleLikeTrack(track, e)
+              }
+              disabled={likingTracks[track.id]}
+            >
+              {likingTracks[track.id]
+                ? "..."
+                : isTrackLiked(track)
+                ? "❤️"
+                : "🤍"}
+            </LikeButton>
+            <CommentButton
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleCommentForm(track.id);
+              }}
+              title="Toggle comments"
+            >
+              💬
+            </CommentButton>
+          </TrackLikesButtons>
           <UserList users={getLikeUsers(track)} variant="small" />
         </TrackLikes>
       </TrackItem>
@@ -931,7 +952,13 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                     >
                       {comment.user.displayName}
                     </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
                       <span
                         style={{
                           color: "rgba(255, 255, 255, 0.6)",
@@ -959,7 +986,8 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                               e.currentTarget.style.color = "white";
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.color = "rgba(255, 255, 255, 0.6)";
+                              e.currentTarget.style.color =
+                                "rgba(255, 255, 255, 0.6)";
                             }}
                           >
                             ⋮
@@ -994,7 +1022,8 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                                   e.currentTarget.style.background = "#f5f5f5";
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = "transparent";
+                                  e.currentTarget.style.background =
+                                    "transparent";
                                 }}
                               >
                                 Edit
@@ -1015,7 +1044,8 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                                   e.currentTarget.style.background = "#f5f5f5";
                                 }}
                                 onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = "transparent";
+                                  e.currentTarget.style.background =
+                                    "transparent";
                                 }}
                               >
                                 Delete
@@ -1026,7 +1056,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                       )}
                     </div>
                   </div>
-                  
+
                   {isEditing ? (
                     <form
                       onSubmit={(e) => handleEditComment(comment.id, e)}
@@ -1075,8 +1105,14 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                       <button
                         type="button"
                         onClick={() => {
-                          setEditingComments((prev) => ({ ...prev, [comment.id]: false }));
-                          setEditCommentData((prev) => ({ ...prev, [comment.id]: "" }));
+                          setEditingComments((prev) => ({
+                            ...prev,
+                            [comment.id]: false,
+                          }));
+                          setEditCommentData((prev) => ({
+                            ...prev,
+                            [comment.id]: "",
+                          }));
                         }}
                         style={{
                           background: "rgba(255, 255, 255, 0.2)",
@@ -1184,16 +1220,28 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
       <ModalStyles />
       <TrackListContainer>
         <ViewToggle>
-          <ToggleContainer>
-            <ToggleLabel isActive={!showAlbumView}>Song View</ToggleLabel>
-            <ToggleSwitch
-              isActive={showAlbumView}
-              onClick={() => setShowAlbumView(!showAlbumView)}
-            >
-              <ToggleSlider isActive={showAlbumView} />
-            </ToggleSwitch>
-            <ToggleLabel isActive={showAlbumView}>Album View</ToggleLabel>
-          </ToggleContainer>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            {collaborators && collaborators.length > 0 && (
+              <UserList users={collaborators} variant="large" />
+            )}
+            <ToggleContainer>
+              <ToggleLabel isActive={!showAlbumView}>Song View</ToggleLabel>
+              <ToggleSwitch
+                isActive={showAlbumView}
+                onClick={() => setShowAlbumView(!showAlbumView)}
+              >
+                <ToggleSlider isActive={showAlbumView} />
+              </ToggleSwitch>
+              <ToggleLabel isActive={showAlbumView}>Album View</ToggleLabel>
+            </ToggleContainer>
+          </div>
         </ViewToggle>
 
         {showAlbumView ? (
@@ -1342,7 +1390,8 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                 lineHeight: "1.5",
               }}
             >
-              Are you sure you want to delete this comment? This action cannot be undone.
+              Are you sure you want to delete this comment? This action cannot
+              be undone.
             </p>
             <div
               style={{
