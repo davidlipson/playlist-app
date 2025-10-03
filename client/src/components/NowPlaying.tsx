@@ -199,14 +199,18 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
   React.useEffect(() => {
     const findCurrentPlaylist = async () => {
       if (!currentTrack) {
+        console.log("🔍 No current track, clearing playlist ID");
         setCurrentPlaylistId(null);
         return;
       }
+
+      console.log("🔍 Finding playlist for track:", currentTrack.name);
 
       try {
         // Get all playlists to find which one contains the current track
         const response = await axios.get("/api/playlists");
         const playlists = response.data.playlists;
+        console.log("🔍 Found", playlists.length, "playlists to check");
 
         for (const playlist of playlists) {
           if (playlist.spotifyPlaylistId) {
@@ -217,6 +221,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
               const tracks = playlistResponse.data.tracks;
 
               if (tracks.some((track: any) => track.id === currentTrack.id)) {
+                console.log("🎵 Found playlist containing current track:", playlist.name, "ID:", playlist.id);
                 setCurrentPlaylistId(playlist.id);
                 return;
               }
@@ -226,6 +231,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
           }
         }
 
+        console.log("❌ No playlist found containing current track");
         setCurrentPlaylistId(null);
       } catch (error) {
         console.error("Error finding current playlist:", error);
@@ -251,6 +257,12 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
   };
 
   const isOnPlaylistPage = location.pathname.includes("/playlist/");
+
+  console.log("🎵 NowPlaying Debug:");
+  console.log("  - Current track:", currentTrack?.name);
+  console.log("  - Current playlist ID:", currentPlaylistId);
+  console.log("  - Is on playlist page:", isOnPlaylistPage);
+  console.log("  - Should show navigation button:", currentPlaylistId && !isOnPlaylistPage);
 
   if (!currentTrack) {
     return null;
