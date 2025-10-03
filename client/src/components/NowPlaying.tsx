@@ -233,11 +233,14 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
 
         console.log("🎵 No playlist found containing current track");
         setCurrentTrackComments([]);
-        } catch (error) {
-          console.error("🎵 Error fetching track comments:", error);
-          console.error("🎵 Error details:", error.response?.data || error.message);
-          setCurrentTrackComments([]);
-        }
+      } catch (error: any) {
+        console.error("🎵 Error fetching track comments:", error);
+        console.error(
+          "🎵 Error details:",
+          error.response?.data || error.message
+        );
+        setCurrentTrackComments([]);
+      }
     };
 
     fetchCurrentTrackComments();
