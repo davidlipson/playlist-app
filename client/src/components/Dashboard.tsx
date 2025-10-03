@@ -198,15 +198,32 @@ const Dashboard: React.FC = () => {
 
     // Add playlists based on filter settings
     if (showPersonal) {
+      // Personal playlists: my playlists that have NOT been shared with others
+      const personalPlaylists = myPlaylists.filter(
+        (playlist) =>
+          !playlist.collaborators || playlist.collaborators.length === 0
+      );
       combined = [
         ...combined,
-        ...myPlaylists.map((playlist) => ({ ...playlist, isShared: false })),
+        ...personalPlaylists.map((playlist) => ({
+          ...playlist,
+          isShared: false,
+        })),
       ];
     }
     if (showShared) {
+      // Shared playlists: playlists shared with me + my playlists that I've shared with others
+      const mySharedPlaylists = myPlaylists.filter(
+        (playlist) =>
+          playlist.collaborators && playlist.collaborators.length > 0
+      );
       combined = [
         ...combined,
         ...sharedPlaylists.map((playlist) => ({ ...playlist, isShared: true })),
+        ...mySharedPlaylists.map((playlist) => ({
+          ...playlist,
+          isShared: true,
+        })),
       ];
     }
 
