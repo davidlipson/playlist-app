@@ -273,7 +273,7 @@ const PlaylistView: React.FC = () => {
           playlistOwner={playlist.owner}
         />
       </Content>
-      <NowPlaying trackComments={trackComments} />
+      <NowPlaying />
     </PlaylistContainer>
   );
 };
