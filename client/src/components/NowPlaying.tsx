@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSpotify } from "../contexts/SpotifyContext";
 import { formatDuration, formatTimestamp } from "../utils/timeUtils";
+import axios from "axios";
 
 const NowPlayingContainer = styled.div`
   position: fixed;
@@ -123,7 +124,6 @@ const CommentTooltip = styled.div<{ isVisible: boolean }>`
   }
 `;
 
-
 interface NowPlayingProps {
   trackComments?: { [trackId: string]: any[] };
 }
@@ -131,17 +131,63 @@ interface NowPlayingProps {
 const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
   const { currentTrack, position } = useSpotify();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
+  const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
+
+  // Fetch comments for the current track
+  useEffect(() => {
+    const fetchCurrentTrackComments = async () => {
+      if (!currentTrack) {
+        setCurrentTrackComments([]);
+        return;
+      }
+
+      try {
+        // Try to get comments from the passed trackComments prop first
+        if (trackComments[currentTrack.id]) {
+          setCurrentTrackComments(trackComments[currentTrack.id]);
+          return;
+        }
+
+        // If not available in props, fetch from server
+        // We need to find which playlist contains this track to get comments
+        const response = await axios.get("/api/playlists");
+        const playlists = response.data.playlists;
+
+        for (const playlist of playlists) {
+          if (playlist.spotifyPlaylistId) {
+            try {
+              const playlistResponse = await axios.get(`/api/playlists/${playlist.id}`);
+              const tracks = playlistResponse.data.tracks;
+              
+              if (tracks.some((track: any) => track.id === currentTrack.id)) {
+                // Found the playlist, now get comments for this track
+                const commentsResponse = await axios.get(`/api/comments/playlist/${playlist.id}/track/${currentTrack.id}`);
+                setCurrentTrackComments(commentsResponse.data);
+                return;
+              }
+            } catch (error) {
+              console.error("Error checking playlist for comments:", error);
+            }
+          }
+        }
+        
+        setCurrentTrackComments([]);
+      } catch (error) {
+        console.error("Error fetching track comments:", error);
+        setCurrentTrackComments([]);
+      }
+    };
+
+    fetchCurrentTrackComments();
+  }, [currentTrack, trackComments]);
 
   // Get timestamped comments for the current track
   const getTimestampedCommentsForCurrentTrack = () => {
     if (!currentTrack) return [];
-    const comments = trackComments[currentTrack.id] || [];
-    return comments.filter(
+    return currentTrackComments.filter(
       (comment: any) => comment.inSongTimestamp && comment.inSongTimestamp > 0
     );
   };
-
-
 
   if (!currentTrack) {
     return null;
@@ -210,7 +256,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
           {currentTrack?.artists?.map((artist) => artist.name).join(", ")}
         </div>
       </NowPlayingInfo>
-
     </NowPlayingContainer>
   );
 };
