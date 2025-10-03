@@ -15,8 +15,6 @@ const Card = styled.div<{ isShared?: boolean }>`
   height: 100%;
 
   &:hover {
-    background: ${(props) =>
-      props.isShared ? "rgb(44 249 43 / 50%)" : "rgba(255, 255, 255, 0.2)"};
     transform: translateY(-5px);
   }
 `;
