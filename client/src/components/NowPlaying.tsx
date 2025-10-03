@@ -6,18 +6,21 @@ import axios from "axios";
 
 const NowPlayingContainer = styled.div`
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(238, 231, 222, 0.3);
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(15px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 15px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   z-index: 1000;
+  max-width: 300px;
+  min-width: 250px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 `;
 
 const NowPlayingInfo = styled.div`
@@ -25,7 +28,7 @@ const NowPlayingInfo = styled.div`
 `;
 
 const NowPlayingTrackName = styled.div`
-  color: #2c2c2c;
+  color: white;
   font-weight: 600;
   font-size: 14px;
   white-space: nowrap;
@@ -37,10 +40,8 @@ const NowPlayingTrackName = styled.div`
 const ProgressContainer = styled.div`
   display: flex;
   align-items: center;
-  min-width: 200px;
   width: 100%;
-  max-width: 400px;
-  gap: 10px;
+  gap: 8px;
 `;
 
 const ProgressBar = styled.div`
@@ -67,7 +68,7 @@ const ProgressFill = styled.div<{ progress: number }>`
 `;
 
 const TimeDisplay = styled.div`
-  color: rgba(44, 44, 44, 0.8);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 11px;
   font-family: monospace;
   white-space: nowrap;
@@ -156,12 +157,16 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
         for (const playlist of playlists) {
           if (playlist.spotifyPlaylistId) {
             try {
-              const playlistResponse = await axios.get(`/api/playlists/${playlist.id}`);
+              const playlistResponse = await axios.get(
+                `/api/playlists/${playlist.id}`
+              );
               const tracks = playlistResponse.data.tracks;
-              
+
               if (tracks.some((track: any) => track.id === currentTrack.id)) {
                 // Found the playlist, now get comments for this track
-                const commentsResponse = await axios.get(`/api/comments/playlist/${playlist.id}/track/${currentTrack.id}`);
+                const commentsResponse = await axios.get(
+                  `/api/comments/playlist/${playlist.id}/track/${currentTrack.id}`
+                );
                 setCurrentTrackComments(commentsResponse.data);
                 return;
               }
@@ -170,7 +175,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
             }
           }
         }
-        
+
         setCurrentTrackComments([]);
       } catch (error) {
         console.error("Error fetching track comments:", error);
@@ -252,7 +257,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
         <NowPlayingTrackName>
           {currentTrack?.name || "No track playing"}
         </NowPlayingTrackName>
-        <div style={{ fontSize: "12px", color: "rgba(44, 44, 44, 0.7)" }}>
+        <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.7)" }}>
           {currentTrack?.artists?.map((artist) => artist.name).join(", ")}
         </div>
       </NowPlayingInfo>
