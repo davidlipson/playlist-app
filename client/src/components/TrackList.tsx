@@ -596,7 +596,20 @@ const TrackList: React.FC<TrackListProps> = ({
   const handleTrackClick = async (track: Track) => {
     try {
       const trackUri = `spotify:track:${track.id}`;
-      await playTrack(trackUri);
+
+      // Create array of all track URIs in the playlist
+      const playlistTrackUris = tracks.map((t) => `spotify:track:${t.id}`);
+
+      // Find the index of the clicked track
+      const trackIndex = tracks.findIndex((t) => t.id === track.id);
+
+      console.log("🎯 Track Click Debug:");
+      console.log("  - Clicked track:", track.name);
+      console.log("  - Track index in playlist:", trackIndex);
+      console.log("  - Total tracks in playlist:", tracks.length);
+      console.log("  - Will play from track", trackIndex + 1, "to end");
+
+      await playTrack(trackUri, playlistTrackUris, trackIndex);
     } catch (error) {
       console.error("Failed to play track:", error);
       alert("Failed to play track. Please try again.");

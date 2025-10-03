@@ -14,7 +14,11 @@ interface SpotifyContextType {
   currentTrack: SpotifyApi.TrackObjectFull | null;
   isPlaying: boolean;
   position: number;
-  playTrack: (trackUri: string) => Promise<void>;
+  playTrack: (
+    trackUri: string,
+    playlistTracks?: string[],
+    startIndex?: number
+  ) => Promise<void>;
   pauseTrack: () => Promise<void>;
   resumeTrack: () => Promise<void>;
   seekToPosition: (positionMs: number) => Promise<void>;
@@ -97,14 +101,52 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
 
   // No Web Playback SDK - using API-only approach
 
-  const playTrack = async (trackUri: string) => {
+  const playTrack = async (
+    trackUri: string,
+    playlistTracks?: string[],
+    startIndex?: number
+  ) => {
     try {
       console.log("Playing track:", trackUri);
+      console.log("Playlist tracks:", playlistTracks);
+      console.log("Start index:", startIndex);
 
-      // Use Web API to play the track
-      await spotifyApi.play({
-        uris: [trackUri],
-      });
+      if (playlistTracks && playlistTracks.length > 0) {
+        // Play the entire playlist starting from the selected track
+        const startIndexToUse =
+          startIndex !== undefined
+            ? startIndex
+            : playlistTracks.indexOf(trackUri);
+        const tracksToPlay = playlistTracks.slice(startIndexToUse);
+
+        console.log("🎵 Playlist Queue Debug:");
+        console.log("  - Total playlist tracks:", playlistTracks.length);
+        console.log("  - Selected track URI:", trackUri);
+        console.log("  - Start index:", startIndexToUse);
+        console.log(
+          "  - Tracks to play (from index",
+          startIndexToUse,
+          "to end):",
+          tracksToPlay.length
+        );
+        console.log("  - First track in queue:", tracksToPlay[0]);
+        console.log(
+          "  - Last track in queue:",
+          tracksToPlay[tracksToPlay.length - 1]
+        );
+
+        // Clear existing queue and play new tracks (spotifyApi.play with uris replaces the queue)
+        console.log("🔄 Clearing existing queue and playing new tracks...");
+        await spotifyApi.play({
+          uris: tracksToPlay,
+        });
+      } else {
+        // Fallback to single track play (also clears existing queue)
+        console.log("🔄 Playing single track (clearing existing queue)...");
+        await spotifyApi.play({
+          uris: [trackUri],
+        });
+      }
 
       console.log("Track should now be playing");
     } catch (error) {
