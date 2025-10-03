@@ -120,7 +120,16 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
         {playlist.imageUrl ? (
           <PlaylistImage src={playlist.imageUrl} alt={playlist.name} />
         ) : (
-          <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>🎵</span>
+          <span
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            🎵
+          </span>
         )}
       </ImageContainer>
 
