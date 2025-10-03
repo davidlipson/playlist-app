@@ -99,12 +99,14 @@ const SpotifyCallback: React.FC = () => {
         if (error) {
           setStatus("error");
           setErrorMessage(`Spotify authentication failed: ${error}`);
+          setIsProcessing(false);
           return;
         }
 
         if (!code) {
           setStatus("error");
           setErrorMessage("No authorization code received from Spotify");
+          setIsProcessing(false);
           return;
         }
 
@@ -121,14 +123,13 @@ const SpotifyCallback: React.FC = () => {
         // Redirect to dashboard after successful login
         setTimeout(() => {
           navigate("/", { replace: true });
-        }, 1000);
+        }, 500);
       } catch (error: any) {
         console.error("Login failed:", error);
         setStatus("error");
         setErrorMessage(
           error.response?.data?.error || "Login failed. Please try again."
         );
-      } finally {
         setIsProcessing(false);
       }
     };

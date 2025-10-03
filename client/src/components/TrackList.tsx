@@ -287,7 +287,6 @@ const TimeDisplay = styled.div`
   white-space: nowrap;
 `;
 
-
 const AlbumSection = styled.div``;
 
 const AlbumHeader = styled.div`

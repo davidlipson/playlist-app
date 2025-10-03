@@ -59,6 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Failed to fetch user:", error);
       localStorage.removeItem("token");
       delete axios.defaults.headers.common["Authorization"];
+      setUser(null);
     } finally {
       setLoading(false);
     }
