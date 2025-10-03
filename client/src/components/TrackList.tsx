@@ -287,19 +287,6 @@ const TimeDisplay = styled.div`
   white-space: nowrap;
 `;
 
-const LikeAvatar = styled.div`
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #1db954;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-`;
 
 const AlbumSection = styled.div``;
 
