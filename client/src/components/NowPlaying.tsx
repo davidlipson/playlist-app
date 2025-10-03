@@ -138,21 +138,28 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
   useEffect(() => {
     const fetchCurrentTrackComments = async () => {
       if (!currentTrack) {
+        console.log("🎵 No current track, clearing comments");
         setCurrentTrackComments([]);
         return;
       }
 
+      console.log("🎵 Fetching comments for track:", currentTrack.name, "ID:", currentTrack.id);
+
       try {
         // Try to get comments from the passed trackComments prop first
         if (trackComments[currentTrack.id]) {
+          console.log("🎵 Using comments from props:", trackComments[currentTrack.id].length, "comments");
           setCurrentTrackComments(trackComments[currentTrack.id]);
           return;
         }
+
+        console.log("🎵 No comments in props, fetching from server...");
 
         // If not available in props, fetch from server
         // We need to find which playlist contains this track to get comments
         const response = await axios.get("/api/playlists");
         const playlists = response.data.playlists;
+        console.log("🎵 Found", playlists.length, "playlists to check");
 
         for (const playlist of playlists) {
           if (playlist.spotifyPlaylistId) {
@@ -163,10 +170,12 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
               const tracks = playlistResponse.data.tracks;
 
               if (tracks.some((track: any) => track.id === currentTrack.id)) {
+                console.log("🎵 Found playlist containing track:", playlist.name);
                 // Found the playlist, now get comments for this track
                 const commentsResponse = await axios.get(
                   `/api/comments/playlist/${playlist.id}/track/${currentTrack.id}`
                 );
+                console.log("🎵 Fetched comments:", commentsResponse.data.length, "comments");
                 setCurrentTrackComments(commentsResponse.data);
                 return;
               }
@@ -176,6 +185,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
           }
         }
 
+        console.log("🎵 No playlist found containing current track");
         setCurrentTrackComments([]);
       } catch (error) {
         console.error("Error fetching track comments:", error);
@@ -189,9 +199,11 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
   // Get timestamped comments for the current track
   const getTimestampedCommentsForCurrentTrack = () => {
     if (!currentTrack) return [];
-    return currentTrackComments.filter(
+    const timestampedComments = currentTrackComments.filter(
       (comment: any) => comment.inSongTimestamp && comment.inSongTimestamp > 0
     );
+    console.log("🎵 Timestamped comments for current track:", timestampedComments.length);
+    return timestampedComments;
   };
 
   if (!currentTrack) {
