@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useSpotify } from "../contexts/SpotifyContext";
-import { useAuth } from "../contexts/AuthContext";
 import { formatDuration, formatTimestamp } from "../utils/timeUtils";
-import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 
 const NowPlayingContainer = styled.div`
   position: fixed;
@@ -126,65 +123,14 @@ const CommentTooltip = styled.div<{ isVisible: boolean }>`
   }
 `;
 
-const NavigationButton = styled.button`
-  background: #1db954;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 5px;
-
-  &:hover {
-    background: #1ed760;
-    transform: translateY(-1px);
-  }
-`;
-
-const ControlsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 5px;
-`;
-
-const PlayPauseButton = styled.button`
-  background: #1db954;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 16px;
-
-  &:hover {
-    background: #1ed760;
-    transform: scale(1.05);
-  }
-`;
 
 interface NowPlayingProps {
   trackComments?: { [trackId: string]: any[] };
 }
 
 const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
-  const { currentTrack, isPlaying, position, pauseTrack, resumeTrack } =
-    useSpotify();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { currentTrack, position } = useSpotify();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
-  const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(
-    null
-  );
 
   // Get timestamped comments for the current track
   const getTimestampedCommentsForCurrentTrack = () => {
@@ -195,74 +141,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
     );
   };
 
-  // Find the current playlist ID when track changes
-  React.useEffect(() => {
-    const findCurrentPlaylist = async () => {
-      if (!currentTrack) {
-        console.log("🔍 No current track, clearing playlist ID");
-        setCurrentPlaylistId(null);
-        return;
-      }
 
-      console.log("🔍 Finding playlist for track:", currentTrack.name);
-
-      try {
-        // Get all playlists to find which one contains the current track
-        const response = await axios.get("/api/playlists");
-        const playlists = response.data.playlists;
-        console.log("🔍 Found", playlists.length, "playlists to check");
-
-        for (const playlist of playlists) {
-          if (playlist.spotifyPlaylistId) {
-            try {
-              const playlistResponse = await axios.get(
-                `/api/playlists/${playlist.id}`
-              );
-              const tracks = playlistResponse.data.tracks;
-
-              if (tracks.some((track: any) => track.id === currentTrack.id)) {
-                console.log("🎵 Found playlist containing current track:", playlist.name, "ID:", playlist.id);
-                setCurrentPlaylistId(playlist.id);
-                return;
-              }
-            } catch (error) {
-              console.error("Error checking playlist:", error);
-            }
-          }
-        }
-
-        console.log("❌ No playlist found containing current track");
-        setCurrentPlaylistId(null);
-      } catch (error) {
-        console.error("Error finding current playlist:", error);
-        setCurrentPlaylistId(null);
-      }
-    };
-
-    findCurrentPlaylist();
-  }, [currentTrack]);
-
-  const handlePlayPause = async () => {
-    if (isPlaying) {
-      await pauseTrack();
-    } else {
-      await resumeTrack();
-    }
-  };
-
-  const handleGoToPlaylist = () => {
-    if (currentPlaylistId) {
-      navigate(`/playlist/${currentPlaylistId}`);
-    }
-  };
-
-  const isOnPlaylistPage = location.pathname.includes("/playlist/");
-
-  console.log("🎵 NowPlaying Debug:");
-  console.log("  - Current track:", currentTrack?.name);
-  console.log("  - Current playlist ID:", currentPlaylistId);
-  console.log("  - Is on playlist page:", isOnPlaylistPage);
-  console.log("  - Should show navigation button:", currentPlaylistId && !isOnPlaylistPage);
 
   if (!currentTrack) {
     return null;
@@ -332,17 +211,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
         </div>
       </NowPlayingInfo>
 
-      <ControlsContainer>
-        <PlayPauseButton onClick={handlePlayPause}>
-          {isPlaying ? "⏸️" : "▶️"}
-        </PlayPauseButton>
-
-        {currentPlaylistId && !isOnPlaylistPage && (
-          <NavigationButton onClick={handleGoToPlaylist}>
-            🎵 Go to Playlist
-          </NavigationButton>
-        )}
-      </ControlsContainer>
     </NowPlayingContainer>
   );
 };
