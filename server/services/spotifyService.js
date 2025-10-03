@@ -9,23 +9,41 @@ class SpotifyService {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
-    const response = await axios.post(
-      "https://accounts.spotify.com/api/token",
-      new URLSearchParams({
-        grant_type: "authorization_code",
-        code: code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    // Validate required environment variables
+    if (!clientId) {
+      throw new Error("SPOTIFY_CLIENT_ID is not set");
+    }
+    if (!clientSecret) {
+      throw new Error("SPOTIFY_CLIENT_SECRET is not set");
+    }
 
-    return response.data;
+    try {
+      console.log("Exchanging authorization code for access token");
+      const response = await axios.post(
+        "https://accounts.spotify.com/api/token",
+        new URLSearchParams({
+          grant_type: "authorization_code",
+          code: code,
+          redirect_uri: redirectUri,
+          client_id: clientId,
+          client_secret: clientSecret,
+        }),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      console.log("Successfully exchanged code for access token");
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to exchange code for access token:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
   }
 
   async refreshAccessToken(refreshToken) {
@@ -51,13 +69,23 @@ class SpotifyService {
   }
 
   async getUserProfile(accessToken) {
-    const response = await axios.get(`${this.baseURL}/me`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    try {
+      console.log("Fetching user profile from Spotify");
+      const response = await axios.get(`${this.baseURL}/me`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-    return response.data;
+      console.log("Successfully retrieved user profile:", response.data.id);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Failed to get user profile:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
   }
 
   async getUserPlaylists(accessToken, limit = 50, offset = 0) {

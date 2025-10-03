@@ -13,7 +13,11 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://your-app.herokuapp.com"]
+        ? [
+            process.env.FRONTEND_URL || "https://your-app.herokuapp.com",
+            "https://your-app.herokuapp.com",
+            "https://playlist-app-*.herokuapp.com",
+          ]
         : ["http://localhost:3000"],
     credentials: true,
   })
@@ -29,7 +33,20 @@ app.use("/api/likes", require("./routes/likes"));
 
 // Health check
 app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", timestamp: new Date().toISOString() });
+  const health = {
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    hasSpotifyClientId: !!process.env.SPOTIFY_CLIENT_ID,
+    hasSpotifyClientSecret: !!process.env.SPOTIFY_CLIENT_SECRET,
+    hasSpotifyRedirectUri: !!process.env.SPOTIFY_REDIRECT_URI,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    port: process.env.PORT || 5003,
+  };
+
+  console.log("Health check requested:", health);
+  res.json(health);
 });
 
 // Serve static files in production

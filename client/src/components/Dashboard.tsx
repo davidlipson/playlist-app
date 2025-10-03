@@ -117,7 +117,7 @@ const NotificationMeta = styled.div`
 `;
 
 const NotificationType = styled.span<{ type: string }>`
-  background: ${props => props.type === 'comment' ? '#1db954' : '#ff6b6b'};
+  background: ${(props) => (props.type === "comment" ? "#1db954" : "#ff6b6b")};
   color: white;
   padding: 2px 6px;
   border-radius: 10px;
@@ -268,15 +268,15 @@ const Dashboard: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showNotifications) {
         const target = event.target as HTMLElement;
-        if (!target.closest('[data-notification-dropdown]')) {
+        if (!target.closest("[data-notification-dropdown]")) {
           setShowNotifications(false);
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showNotifications]);
 
@@ -341,7 +341,7 @@ const Dashboard: React.FC = () => {
       <Header>
         <UserName>Welcome, {user?.displayName}</UserName>
         <HeaderActions>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: "relative" }}>
             <NotificationButton
               hasNotifications={notificationCount > 0}
               onClick={handleNotificationClick}
@@ -358,9 +358,14 @@ const Dashboard: React.FC = () => {
                   recentActivity.map((activity, index) => (
                     <NotificationItem key={index}>
                       <NotificationText>
-                        <strong>{activity.user}</strong> {activity.type === 'comment' ? 'commented on' : 'liked'} "{activity.track}" in <strong>{activity.playlist}</strong>
-                        {activity.type === 'comment' && activity.content && (
-                          <div style={{ fontStyle: 'italic', marginTop: '4px' }}>
+                        <strong>{activity.user}</strong>{" "}
+                        {activity.type === "comment" ? "commented on" : "liked"}{" "}
+                        "{activity.track}" in{" "}
+                        <strong>{activity.playlist}</strong>
+                        {activity.type === "comment" && activity.content && (
+                          <div
+                            style={{ fontStyle: "italic", marginTop: "4px" }}
+                          >
                             "{activity.content}"
                           </div>
                         )}
@@ -369,14 +374,14 @@ const Dashboard: React.FC = () => {
                         <NotificationType type={activity.type}>
                           {activity.type}
                         </NotificationType>
-                        <span>{new Date(activity.createdAt).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(activity.createdAt).toLocaleDateString()}
+                        </span>
                       </NotificationMeta>
                     </NotificationItem>
                   ))
                 ) : (
-                  <EmptyNotifications>
-                    No recent activity
-                  </EmptyNotifications>
+                  <EmptyNotifications>No recent activity</EmptyNotifications>
                 )}
               </NotificationDropdown>
             )}
