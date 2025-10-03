@@ -42,6 +42,15 @@ router.get("/spotify-login", (req, res) => {
   }
 });
 
+// Store processed codes to prevent reuse
+const processedCodes = new Set();
+
+// Clean up old codes every 5 minutes to prevent memory leaks
+setInterval(() => {
+  processedCodes.clear();
+  console.log("Cleared processed authorization codes cache");
+}, 5 * 60 * 1000); // 5 minutes
+
 // Handle Spotify callback
 router.post("/spotify-callback", async (req, res) => {
   try {
@@ -63,6 +72,15 @@ router.post("/spotify-callback", async (req, res) => {
       console.error("No authorization code provided");
       return res.status(400).json({ error: "Authorization code required" });
     }
+
+    // Check if this code has already been processed
+    if (processedCodes.has(code)) {
+      console.log("Authorization code already processed, ignoring duplicate request");
+      return res.status(400).json({ error: "Authorization code already used" });
+    }
+
+    // Mark this code as being processed
+    processedCodes.add(code);
 
     console.log(
       "Processing Spotify callback with code:",
