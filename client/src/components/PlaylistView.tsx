@@ -118,6 +118,7 @@ const PlaylistView: React.FC = () => {
   const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [allPlaylists, setAllPlaylists] = useState<any[]>([]);
   // No longer using isPlayerReady - using API-only approach
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -157,9 +158,28 @@ const PlaylistView: React.FC = () => {
     }
   }, [playlistId, shareCode, navigate]);
 
+  const fetchAllPlaylists = useCallback(async () => {
+    try {
+      const [myPlaylistsResponse, sharedPlaylistsResponse] = await Promise.all([
+        axios.get("/api/playlists/my-playlists"),
+        axios.get("/api/playlists/shared-playlists"),
+      ]);
+
+      const allPlaylists = [
+        ...myPlaylistsResponse.data.playlists,
+        ...sharedPlaylistsResponse.data.playlists,
+      ];
+
+      setAllPlaylists(allPlaylists);
+    } catch (error) {
+      console.error("Failed to fetch all playlists:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchPlaylist();
-  }, [fetchPlaylist]);
+    fetchAllPlaylists();
+  }, [fetchPlaylist, fetchAllPlaylists]);
 
   const handleBack = () => {
     navigate("/");
@@ -230,9 +250,7 @@ const PlaylistView: React.FC = () => {
         }
         rightContent={
           <>
-            <NotificationDropdown
-              availablePlaylists={playlist ? [playlist] : []}
-            />
+            <NotificationDropdown availablePlaylists={allPlaylists} />
             <LogoutButton onClick={handleLogout} />
           </>
         }

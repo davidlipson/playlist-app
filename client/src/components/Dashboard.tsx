@@ -47,7 +47,10 @@ const FilterContainer = styled.div`
   justify-content: center;
 `;
 
-const FilterPill = styled.button<{ isActive: boolean; variant: 'shared' | 'personal' }>`
+const FilterPill = styled.button<{
+  isActive: boolean;
+  variant: "shared" | "personal";
+}>`
   padding: 8px 16px;
   border: none;
   border-radius: 20px;
@@ -55,10 +58,10 @@ const FilterPill = styled.button<{ isActive: boolean; variant: 'shared' | 'perso
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  
-  ${props => {
+
+  ${(props) => {
     if (props.isActive) {
-      if (props.variant === 'shared') {
+      if (props.variant === "shared") {
         return `
           background: rgb(44 249 43 / 36%);
           color: white;
@@ -76,11 +79,11 @@ const FilterPill = styled.button<{ isActive: boolean; variant: 'shared' | 'perso
       `;
     }
   }}
-  
+
   &:hover {
-    ${props => {
+    ${(props) => {
       if (props.isActive) {
-        if (props.variant === 'shared') {
+        if (props.variant === "shared") {
           return `
             background: rgb(44 249 43 / 50%);
           `;
@@ -189,13 +192,19 @@ const Dashboard: React.FC = () => {
   // Combine and filter all playlists
   const allPlaylists = useMemo(() => {
     let combined: (Playlist & { isShared: boolean })[] = [];
-    
+
     // Add playlists based on filter settings
     if (showPersonal) {
-      combined = [...combined, ...myPlaylists.map((playlist) => ({ ...playlist, isShared: false }))];
+      combined = [
+        ...combined,
+        ...myPlaylists.map((playlist) => ({ ...playlist, isShared: false })),
+      ];
     }
     if (showShared) {
-      combined = [...combined, ...sharedPlaylists.map((playlist) => ({ ...playlist, isShared: true }))];
+      combined = [
+        ...combined,
+        ...sharedPlaylists.map((playlist) => ({ ...playlist, isShared: true })),
+      ];
     }
 
     if (!searchQuery.trim()) {

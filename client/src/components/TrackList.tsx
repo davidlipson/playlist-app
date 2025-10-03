@@ -983,12 +983,16 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                           .join(", ")}
                       </AlbumMeta>
                       <AlbumStats>
-                        <AlbumStatItem>
-                          💬 {albumStats.totalComments}
-                        </AlbumStatItem>
-                        <AlbumStatItem>
-                          ❤️ {albumStats.totalLikes}
-                        </AlbumStatItem>
+                        {albumStats.totalComments > 0 && (
+                          <AlbumStatItem>
+                            💬 {albumStats.totalComments}
+                          </AlbumStatItem>
+                        )}
+                        {albumStats.totalLikes > 0 && (
+                          <AlbumStatItem>
+                            ❤️ {albumStats.totalLikes}
+                          </AlbumStatItem>
+                        )}
                       </AlbumStats>
                     </AlbumInfo>
 

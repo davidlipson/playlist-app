@@ -23,7 +23,6 @@ const CallbackCard = styled.div`
   width: 100%;
 `;
 
-
 const Title = styled.h1`
   color: #333;
   margin-bottom: 10px;

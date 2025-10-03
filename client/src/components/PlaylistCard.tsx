@@ -123,8 +123,12 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
       <PlaylistMeta>
         <Owner>by {playlist.owner.displayName}</Owner>
         <EngagementStats>
-          <CommentCount>💬 {playlist.commentCount}</CommentCount>
-          <LikeCount>❤️ {playlist.likeCount}</LikeCount>
+          {playlist.commentCount > 0 && (
+            <CommentCount>💬 {playlist.commentCount}</CommentCount>
+          )}
+          {playlist.likeCount > 0 && (
+            <LikeCount>❤️ {playlist.likeCount}</LikeCount>
+          )}
         </EngagementStats>
       </PlaylistMeta>
     </Card>
