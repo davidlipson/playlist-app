@@ -166,8 +166,11 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
 
         // If not available in props, fetch from server
         // We need to find which playlist contains this track to get comments
+        console.log("🎵 Making API call to /api/playlists...");
         const response = await axios.get("/api/playlists");
+        console.log("🎵 API response received:", response.status);
         const playlists = response.data.playlists;
+        console.log("🎵 Playlists data:", response.data);
         console.log("🎵 Found", playlists.length, "playlists to check");
         console.log(
           "🎵 Playlists:",
@@ -230,10 +233,11 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
 
         console.log("🎵 No playlist found containing current track");
         setCurrentTrackComments([]);
-      } catch (error) {
-        console.error("Error fetching track comments:", error);
-        setCurrentTrackComments([]);
-      }
+        } catch (error) {
+          console.error("🎵 Error fetching track comments:", error);
+          console.error("🎵 Error details:", error.response?.data || error.message);
+          setCurrentTrackComments([]);
+        }
     };
 
     fetchCurrentTrackComments();
