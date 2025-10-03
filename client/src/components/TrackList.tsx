@@ -5,6 +5,7 @@ import { useSpotify } from "../contexts/SpotifyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { formatDuration } from "../utils/timeUtils";
 import { formatDistanceToNow } from "date-fns";
+import UserList from "./UserList";
 // import { Favorite, FavoriteBorder, ModeComment } from "@mui/icons-material";
 
 const TrackListContainer = styled.div`
@@ -196,27 +197,6 @@ const LikeButton = styled.button<{ isLiked: boolean }>`
     border-color: ${(props) =>
       props.isLiked ? "#1ed760" : "rgba(255, 255, 255, 0.5)"};
   }
-`;
-
-const LikeAvatars = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: 8px;
-`;
-
-const LikeAvatar = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #1db954;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 `;
 
 const NowPlayingContainer = styled.div`
@@ -574,14 +554,10 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
     return likes.some((like) => like.user.id === user.id);
   };
 
-  const getLikeAvatars = (track: Track) => {
+  const getLikeUsers = (track: Track) => {
     // Use local state if available, otherwise fall back to track.likes from server
     const likes = trackLikes[track.id] || track.likes || [];
-    return likes.slice(0, 3).map((like, index) => (
-      <LikeAvatar key={like.id} title={like.user.displayName}>
-        {like.user.displayName.charAt(0).toUpperCase()}
-      </LikeAvatar>
-    ));
+    return likes.map((like) => like.user);
   };
 
   const getAlbumStats = (albumTracks: Track[]) => {
@@ -798,9 +774,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
           >
             💬
           </CommentButton>
-          {getLikeAvatars(track).length > 0 && (
-            <LikeAvatars>{getLikeAvatars(track)}</LikeAvatars>
-          )}
+          <UserList users={getLikeUsers(track)} maxDisplay={3} />
         </TrackLikes>
       </TrackItem>
     );

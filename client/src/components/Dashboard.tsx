@@ -42,9 +42,8 @@ const EmptyText = styled.p`
 
 const FilterContainer = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 20px;
-  justify-content: center;
 `;
 
 const FilterPill = styled.button<{
@@ -54,7 +53,7 @@ const FilterPill = styled.button<{
   padding: 8px 16px;
   border: none;
   border-radius: 20px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;

@@ -7,6 +7,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import NotificationDropdown from "./NotificationDropdown";
 import LogoutButton from "./LogoutButton";
 import PageHeader from "./PageHeader";
+import UserList from "./UserList";
 import { useAuth } from "../contexts/AuthContext";
 
 const PlaylistContainer = styled.div`
@@ -105,6 +106,10 @@ interface PlaylistData {
     id: string;
     displayName: string;
   };
+  collaborators?: {
+    id: string;
+    displayName: string;
+  }[];
   tracks: Track[];
   isPublic: boolean;
   shareCode: string;
@@ -257,6 +262,14 @@ const PlaylistView: React.FC = () => {
       >
         <h1>{playlist.name}</h1>
       </PageHeader>
+
+      {playlist.collaborators && playlist.collaborators.length > 0 && (
+        <UserList
+          users={playlist.collaborators}
+          maxDisplay={5}
+          title="Collaborators:"
+        />
+      )}
 
       <Content>
         <TrackList tracks={playlist.tracks} playlistId={playlist.id} />
