@@ -442,6 +442,15 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
   const [submittingComments, setSubmittingComments] = useState<{
     [trackId: string]: boolean;
   }>({});
+  const [editingComments, setEditingComments] = useState<{
+    [commentId: string]: boolean;
+  }>({});
+  const [editCommentData, setEditCommentData] = useState<{
+    [commentId: string]: string;
+  }>({});
+  const [showCommentMenus, setShowCommentMenus] = useState<{
+    [commentId: string]: boolean;
+  }>({});
 
   // Group tracks by album
   const albumGroups = useMemo(() => {
@@ -646,6 +655,52 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
     }
   };
 
+  const handleEditComment = async (commentId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    const content = editCommentData[commentId]?.trim();
+    if (!content) return;
+
+    try {
+      await axios.put(`/api/comments/${commentId}`, {
+        content,
+      });
+
+      setEditingComments((prev) => ({ ...prev, [commentId]: false }));
+      setEditCommentData((prev) => ({ ...prev, [commentId]: "" }));
+      // Refresh all comments to show the updated one
+      await fetchAllComments();
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+      alert("Failed to edit comment. Please try again.");
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+
+    try {
+      await axios.delete(`/api/comments/${commentId}`);
+      // Refresh all comments to remove the deleted one
+      await fetchAllComments();
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      alert("Failed to delete comment. Please try again.");
+    }
+  };
+
+  const toggleCommentMenu = (commentId: string) => {
+    setShowCommentMenus((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }));
+  };
+
+  const startEditingComment = (comment: any) => {
+    setEditingComments((prev) => ({ ...prev, [comment.id]: true }));
+    setEditCommentData((prev) => ({ ...prev, [comment.id]: comment.content }));
+    setShowCommentMenus((prev) => ({ ...prev, [comment.id]: false }));
+  };
+
   const toggleCommentForm = (trackId: string) => {
     const isCurrentlyOpen = showCommentForms[trackId];
 
@@ -688,6 +743,21 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
     console.log("fetchAllComments useEffect running");
     fetchAllComments();
   }, [fetchAllComments]);
+
+  // Close comment menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-comment-menu]")) {
+        setShowCommentMenus({});
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Check current playing song every 2 seconds for position updates
   useEffect(() => {
@@ -790,55 +860,213 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
         {/* Comments List - Always show if comments exist */}
         {comments.length > 0 && (
           <div style={{ paddingLeft: "115px", paddingRight: "20px" }}>
-            {comments.map((comment: any) => (
-              <div
-                key={comment.id}
-                style={{
-                  borderRadius: "8px",
-                  padding: "10px 10px 10px 0px",
-                  marginBottom: "8px",
-                  color: "white",
-                }}
-              >
+            {comments.map((comment: any) => {
+              const isOwnComment = comment.user.id === user?.id;
+              const isEditing = editingComments[comment.id];
+              const showMenu = showCommentMenus[comment.id];
+
+              return (
                 <div
+                  key={comment.id}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "5px",
+                    borderRadius: "8px",
+                    padding: "10px 10px 10px 0px",
+                    marginBottom: "8px",
+                    color: "white",
+                    position: "relative",
                   }}
                 >
-                  <span
+                  <div
                     style={{
-                      color: "white",
-                      fontWeight: "600",
-                      fontSize: "14px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "5px",
                     }}
                   >
-                    {comment.user.displayName}
-                  </span>
-                  <span
-                    style={{
-                      color: "rgba(255, 255, 255, 0.6)",
-                      fontSize: "12px",
-                    }}
-                  >
-                    {formatDistanceToNow(new Date(comment.createdAt), {
-                      addSuffix: true,
-                    })}
-                  </span>
+                    <span
+                      style={{
+                        color: "white",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {comment.user.displayName}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span
+                        style={{
+                          color: "rgba(255, 255, 255, 0.6)",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {formatDistanceToNow(new Date(comment.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                      {isOwnComment && (
+                        <div style={{ position: "relative" }} data-comment-menu>
+                          <button
+                            onClick={() => toggleCommentMenu(comment.id)}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              color: "rgba(255, 255, 255, 0.6)",
+                              cursor: "pointer",
+                              padding: "4px",
+                              borderRadius: "4px",
+                              fontSize: "16px",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = "white";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = "rgba(255, 255, 255, 0.6)";
+                            }}
+                          >
+                            ⋮
+                          </button>
+                          {showMenu && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "100%",
+                                right: "0",
+                                background: "white",
+                                borderRadius: "8px",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                                zIndex: 1000,
+                                minWidth: "120px",
+                                overflow: "hidden",
+                              }}
+                            >
+                              <button
+                                onClick={() => startEditingComment(comment)}
+                                style={{
+                                  width: "100%",
+                                  padding: "8px 12px",
+                                  border: "none",
+                                  background: "transparent",
+                                  cursor: "pointer",
+                                  fontSize: "14px",
+                                  color: "#333",
+                                  textAlign: "left",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = "#f5f5f5";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = "transparent";
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                style={{
+                                  width: "100%",
+                                  padding: "8px 12px",
+                                  border: "none",
+                                  background: "transparent",
+                                  cursor: "pointer",
+                                  fontSize: "14px",
+                                  color: "#e74c3c",
+                                  textAlign: "left",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = "#f5f5f5";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = "transparent";
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {isEditing ? (
+                    <form
+                      onSubmit={(e) => handleEditComment(comment.id, e)}
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <input
+                        type="text"
+                        value={editCommentData[comment.id] || ""}
+                        onChange={(e) =>
+                          setEditCommentData((prev) => ({
+                            ...prev,
+                            [comment.id]: e.target.value,
+                          }))
+                        }
+                        style={{
+                          flex: 1,
+                          background: "rgba(255, 255, 255, 0.1)",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          borderRadius: "8px",
+                          padding: "8px",
+                          color: "white",
+                          fontSize: "14px",
+                          outline: "none",
+                        }}
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        style={{
+                          background: "#1db954",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          padding: "8px 12px",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingComments((prev) => ({ ...prev, [comment.id]: false }));
+                          setEditCommentData((prev) => ({ ...prev, [comment.id]: "" }));
+                        }}
+                        style={{
+                          background: "rgba(255, 255, 255, 0.2)",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          padding: "8px 12px",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </form>
+                  ) : (
+                    <div
+                      style={{
+                        color: "rgba(255, 255, 255, 0.7)",
+                        fontSize: "14px",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      {comment.content}
+                    </div>
+                  )}
                 </div>
-                <div
-                  style={{
-                    color: "rgba(255, 255, 255, 0.7)",
-                    fontSize: "14px",
-                    lineHeight: "1.4",
-                  }}
-                >
-                  {comment.content}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

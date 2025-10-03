@@ -232,10 +232,10 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                 >
                   <NotificationText>
                     <strong>{activity.user}</strong>{" "}
-                    {activity.type === "comment" 
-                      ? "commented on" 
-                      : activity.type === "like" 
-                      ? "liked" 
+                    {activity.type === "comment"
+                      ? "commented on"
+                      : activity.type === "like"
+                      ? "liked"
                       : "joined"}{" "}
                     {activity.type === "like" && `"${activity.track}" in `}
                     <strong>{activity.playlist}</strong>
