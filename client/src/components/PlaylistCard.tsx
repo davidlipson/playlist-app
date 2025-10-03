@@ -24,7 +24,7 @@ const ImageContainer = styled.div`
   padding-bottom: 100%; /* Creates a square aspect ratio (1:1) */
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;

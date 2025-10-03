@@ -8,7 +8,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import SearchInput from "./SearchInput";
 import NotificationDropdown from "./NotificationDropdown";
 import LogoutButton from "./LogoutButton";
-import PageHeader, { UserName } from "./PageHeader";
+import PageHeader from "./PageHeader";
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
