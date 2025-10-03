@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
@@ -37,17 +37,19 @@ const NotificationBadge = styled.span`
   right: -5px;
 `;
 
-const NotificationDropdownContainer = styled.div`
-  position: absolute;
-  top: 100%;
-  right: 0;
+const NotificationDropdownContainer = styled.div<{
+  top: number;
+  right: number;
+}>`
+  position: fixed;
+  top: ${(props) => props.top}px;
+  right: ${(props) => props.right}px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   min-width: 300px;
   max-width: 400px;
   z-index: 9999;
-  margin-top: 8px;
 `;
 
 const NotificationItem = styled.div`
@@ -119,6 +121,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   const [notificationCount, setNotificationCount] = useState(0);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    right: 0,
+  });
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
   const fetchNotifications = useCallback(async () => {
@@ -141,6 +148,14 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   }, []);
 
   const handleNotificationClick = useCallback(() => {
+    if (!showNotifications && buttonRef.current) {
+      // Calculate position for the dropdown
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const top = buttonRect.bottom + window.scrollY + 8; // 8px margin
+      const right = window.innerWidth - buttonRect.right;
+      setDropdownPosition({ top, right });
+    }
+
     setShowNotifications(!showNotifications);
     if (notificationCount > 0) {
       markNotificationsAsRead();
@@ -190,8 +205,9 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   }, [showNotifications]);
 
   return (
-    <div style={{ position: "relative" }}>
+    <>
       <NotificationButton
+        ref={buttonRef}
         hasNotifications={notificationCount > 0}
         onClick={handleNotificationClick}
       >
@@ -201,7 +217,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         )}
       </NotificationButton>
       {showNotifications && (
-        <NotificationDropdownContainer data-notification-dropdown>
+        <NotificationDropdownContainer
+          top={dropdownPosition.top}
+          right={dropdownPosition.right}
+          data-notification-dropdown
+        >
           {recentActivity.length > 0 ? (
             recentActivity.slice(0, 5).map((activity, index) => {
               const timeAgo = getTimeAgo(new Date(activity.createdAt));
@@ -232,7 +252,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           )}
         </NotificationDropdownContainer>
       )}
-    </div>
+    </>
   );
 };
 

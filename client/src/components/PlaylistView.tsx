@@ -5,21 +5,13 @@ import axios from "axios";
 import TrackList from "./TrackList";
 import LoadingSpinner from "./LoadingSpinner";
 import NotificationDropdown from "./NotificationDropdown";
+import LogoutButton from "./LogoutButton";
+import PageHeader from "./PageHeader";
+import { useAuth } from "../contexts/AuthContext";
 
 const PlaylistContainer = styled.div`
   min-height: 100vh;
   padding: 40px;
-`;
-
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  color: white;
-  gap: 20px;
 `;
 
 const BackButton = styled.button`
@@ -54,12 +46,6 @@ const ShareButton = styled.button`
     background: #4a4a4a;
     cursor: not-allowed;
   }
-`;
-
-const HeaderActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
 `;
 
 const Content = styled.div`
@@ -134,6 +120,7 @@ const PlaylistView: React.FC = () => {
   const [copied, setCopied] = useState(false);
   // No longer using isPlayerReady - using API-only approach
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const fetchPlaylist = useCallback(async () => {
     console.log(
@@ -178,6 +165,11 @@ const PlaylistView: React.FC = () => {
     navigate("/");
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   const handleCopyShareCode = async () => {
     if (playlist?.spotifyId) {
       try {
@@ -214,30 +206,39 @@ const PlaylistView: React.FC = () => {
   if (!playlist) {
     return (
       <PlaylistContainer>
-        <Header>
-          <BackButton onClick={handleBack}>← Back</BackButton>
+        <PageHeader
+          leftContent={<BackButton onClick={handleBack}>← Back</BackButton>}
+        >
           <h1>Playlist not found</h1>
-        </Header>
+        </PageHeader>
       </PlaylistContainer>
     );
   }
 
   return (
     <PlaylistContainer>
-      <Header>
-        <BackButton onClick={handleBack}>← Back</BackButton>
+      <PageHeader
+        leftContent={
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <BackButton onClick={handleBack}>← Back</BackButton>
+            {playlist.shareCode && (
+              <ShareButton onClick={handleCopyShareCode} disabled={copied}>
+                {copied ? "Copied!" : "Share"}
+              </ShareButton>
+            )}
+          </div>
+        }
+        rightContent={
+          <>
+            <NotificationDropdown
+              availablePlaylists={playlist ? [playlist] : []}
+            />
+            <LogoutButton onClick={handleLogout} />
+          </>
+        }
+      >
         <h1>{playlist.name}</h1>
-        <HeaderActions>
-          <NotificationDropdown
-            availablePlaylists={playlist ? [playlist] : []}
-          />
-          {playlist.shareCode && (
-            <ShareButton onClick={handleCopyShareCode} disabled={copied}>
-              {copied ? "Copied!" : "Share"}
-            </ShareButton>
-          )}
-        </HeaderActions>
-      </Header>
+      </PageHeader>
 
       <Content>
         <TrackList tracks={playlist.tracks} playlistId={playlist.id} />

@@ -7,44 +7,14 @@ import PlaylistCard from "./PlaylistCard";
 import LoadingSpinner from "./LoadingSpinner";
 import SearchInput from "./SearchInput";
 import NotificationDropdown from "./NotificationDropdown";
+import LogoutButton from "./LogoutButton";
+import PageHeader, { UserName } from "./PageHeader";
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
   padding: 20px;
 `;
 
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  color: white;
-`;
-
-const UserName = styled.span`
-  font-size: 16px;
-  font-weight: 500;
-`;
-
-const HeaderActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-`;
-
-const LogoutButton = styled.button`
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
-  border-radius: 25px;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-`;
 
 const PlaylistsGrid = styled.div`
   display: grid;
@@ -190,15 +160,19 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardContainer>
-      <Header>
-        <UserName>Hey {user?.displayName}!</UserName>
-        <HeaderActions>
-          <NotificationDropdown
-            availablePlaylists={[...myPlaylists, ...sharedPlaylists]}
-          />
-          <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
-        </HeaderActions>
-      </Header>
+      <PageHeader
+        leftContent={<UserName>Hey {user?.displayName}!</UserName>}
+        rightContent={
+          <>
+            <NotificationDropdown
+              availablePlaylists={[...myPlaylists, ...sharedPlaylists]}
+            />
+            <LogoutButton onClick={handleLogout} />
+          </>
+        }
+      >
+        <div />
+      </PageHeader>
 
       <SearchInput
         placeholder="Search all playlists..."
