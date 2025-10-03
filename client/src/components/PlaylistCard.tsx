@@ -20,6 +20,8 @@ const Card = styled.div<{ isShared?: boolean }>`
 
 const ImageContainer = styled.div`
   width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* Creates a square aspect ratio (1:1) */
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 15px;
@@ -28,9 +30,13 @@ const ImageContainer = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 48px;
+  position: relative;
 `;
 
 const PlaylistImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -114,7 +120,7 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
         {playlist.imageUrl ? (
           <PlaylistImage src={playlist.imageUrl} alt={playlist.name} />
         ) : (
-          <span>🎵</span>
+          <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>🎵</span>
         )}
       </ImageContainer>
 
