@@ -254,6 +254,24 @@ const Dashboard: React.FC = () => {
     }
   }, [showNotifications, notificationCount, markNotificationsAsRead]);
 
+  const handleNotificationItemClick = useCallback((activity: any) => {
+    // Close the notification dropdown
+    setShowNotifications(false);
+    
+    // Navigate to the playlist
+    if (activity.playlistId) {
+      navigate(`/playlist/${activity.playlistId}`);
+    } else {
+      // Fallback: try to find the playlist by name in the current playlists
+      const playlist = [...myPlaylists, ...sharedPlaylists].find(
+        p => p.name === activity.playlist
+      );
+      if (playlist) {
+        navigate(`/playlist/${playlist.id || playlist.spotifyId}`);
+      }
+    }
+  }, [navigate, myPlaylists, sharedPlaylists]);
+
   useEffect(() => {
     fetchMyPlaylists();
     fetchSharedPlaylists();
@@ -354,7 +372,10 @@ const Dashboard: React.FC = () => {
                   recentActivity.slice(0, 5).map((activity, index) => {
                     const timeAgo = getTimeAgo(new Date(activity.createdAt));
                     return (
-                      <NotificationItem key={index}>
+                      <NotificationItem 
+                        key={index}
+                        onClick={() => handleNotificationItemClick(activity)}
+                      >
                         <NotificationText>
                           <strong>{activity.user}</strong>{" "}
                           {activity.type === "comment" ? "commented" : "liked"}{" "}
