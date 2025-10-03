@@ -239,6 +239,15 @@ router.get("/notifications", authenticateToken, async (req, res) => {
       },
     });
 
+    // Count new playlist joins (when someone joins a playlist you own)
+    const newJoins = await SharedPlaylist.count({
+      where: {
+        playlistId: userPlaylists.map((p) => p.id), // Only playlists owned by the user
+        sharedWithUserId: { [require("sequelize").Op.ne]: userId }, // Exclude user's own joins
+        createdAt: { [require("sequelize").Op.gt]: lastCheck },
+      },
+    });
+
     // Get recent activity (last 10 items) for display
     const recentComments = await Comment.findAll({
       where: {
@@ -266,6 +275,20 @@ router.get("/notifications", authenticateToken, async (req, res) => {
       limit: 5,
     });
 
+    // Get recent playlist joins
+    const recentJoins = await SharedPlaylist.findAll({
+      where: {
+        playlistId: userPlaylists.map((p) => p.id), // Only playlists owned by the user
+        sharedWithUserId: { [require("sequelize").Op.ne]: userId },
+      },
+      include: [
+        { model: User, as: "sharedWithUser", attributes: ["displayName"] },
+        { model: Playlist, as: "playlist", attributes: ["name"] },
+      ],
+      order: [["createdAt", "DESC"]],
+      limit: 5,
+    });
+
     // Combine and sort recent activity
     const recentActivity = [
       ...recentComments.map((comment) => ({
@@ -283,11 +306,17 @@ router.get("/notifications", authenticateToken, async (req, res) => {
         track: like.trackName,
         createdAt: like.createdAt,
       })),
+      ...recentJoins.map((join) => ({
+        type: "join",
+        user: join.sharedWithUser.displayName,
+        playlist: join.playlist.name,
+        createdAt: join.createdAt,
+      })),
     ]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 10);
 
-    const totalNotifications = newComments + newLikes;
+    const totalNotifications = newComments + newLikes + newJoins;
 
     res.json({
       count: totalNotifications,

@@ -242,7 +242,6 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardContainer>
       <PageHeader
-        leftContent={<UserName>Hey {user?.displayName}!</UserName>}
         rightContent={
           <>
             <NotificationDropdown
