@@ -15,7 +15,6 @@ const DashboardContainer = styled.div`
   padding: 20px;
 `;
 
-
 const PlaylistsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -41,6 +40,65 @@ const EmptyText = styled.p`
   opacity: 0.8;
 `;
 
+const FilterContainer = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: center;
+`;
+
+const FilterPill = styled.button<{ isActive: boolean; variant: 'shared' | 'personal' }>`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  ${props => {
+    if (props.isActive) {
+      if (props.variant === 'shared') {
+        return `
+          background: rgb(44 249 43 / 36%);
+          color: white;
+        `;
+      } else {
+        return `
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+        `;
+      }
+    } else {
+      return `
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.5);
+      `;
+    }
+  }}
+  
+  &:hover {
+    ${props => {
+      if (props.isActive) {
+        if (props.variant === 'shared') {
+          return `
+            background: rgb(44 249 43 / 50%);
+          `;
+        } else {
+          return `
+            background: rgba(255, 255, 255, 0.2);
+          `;
+        }
+      } else {
+        return `
+          background: rgba(255, 255, 255, 0.2);
+          color: rgba(255, 255, 255, 0.7);
+        `;
+      }
+    }}
+  }
+`;
+
 interface Playlist {
   id: string;
   spotifyId: string;
@@ -63,6 +121,8 @@ const Dashboard: React.FC = () => {
   const [sharedPlaylists, setSharedPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showShared, setShowShared] = useState(true);
+  const [showPersonal, setShowPersonal] = useState(true);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -118,12 +178,25 @@ const Dashboard: React.FC = () => {
     setSearchQuery(query);
   };
 
+  const handleSharedToggle = () => {
+    setShowShared(!showShared);
+  };
+
+  const handlePersonalToggle = () => {
+    setShowPersonal(!showPersonal);
+  };
+
   // Combine and filter all playlists
   const allPlaylists = useMemo(() => {
-    const combined = [
-      ...myPlaylists.map((playlist) => ({ ...playlist, isShared: false })),
-      ...sharedPlaylists.map((playlist) => ({ ...playlist, isShared: true })),
-    ];
+    let combined: (Playlist & { isShared: boolean })[] = [];
+    
+    // Add playlists based on filter settings
+    if (showPersonal) {
+      combined = [...combined, ...myPlaylists.map((playlist) => ({ ...playlist, isShared: false }))];
+    }
+    if (showShared) {
+      combined = [...combined, ...sharedPlaylists.map((playlist) => ({ ...playlist, isShared: true }))];
+    }
 
     if (!searchQuery.trim()) {
       return combined;
@@ -136,7 +209,7 @@ const Dashboard: React.FC = () => {
         playlist.description?.toLowerCase().includes(query) ||
         playlist.owner.displayName.toLowerCase().includes(query)
     );
-  }, [myPlaylists, sharedPlaylists, searchQuery]);
+  }, [myPlaylists, sharedPlaylists, searchQuery, showShared, showPersonal]);
 
   // Sort playlists by sum of comments and likes (descending), then by date
   const sortedPlaylists = useMemo(() => {
@@ -178,6 +251,23 @@ const Dashboard: React.FC = () => {
         placeholder="Search all playlists..."
         onSearch={handleSearch}
       />
+
+      <FilterContainer>
+        <FilterPill
+          isActive={showPersonal}
+          variant="personal"
+          onClick={handlePersonalToggle}
+        >
+          Personal
+        </FilterPill>
+        <FilterPill
+          isActive={showShared}
+          variant="shared"
+          onClick={handleSharedToggle}
+        >
+          Shared
+        </FilterPill>
+      </FilterContainer>
 
       {sortedPlaylists.length === 0 ? (
         <EmptyState>
