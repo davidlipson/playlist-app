@@ -216,7 +216,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {} }) => {
                 console.log(
                   "🎵 Comments with inSongTimestamp:",
                   commentsResponse.data.filter(
-                    (c) => c.inSongTimestamp && c.inSongTimestamp > 0
+                    (c: any) => c.inSongTimestamp && c.inSongTimestamp > 0
                   )
                 );
                 setCurrentTrackComments(commentsResponse.data);
