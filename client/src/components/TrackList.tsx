@@ -344,6 +344,21 @@ const AlbumMeta = styled.div`
   text-overflow: ellipsis;
 `;
 
+const AlbumStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+`;
+
+const AlbumStatItem = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+`;
+
 const CollapseButton = styled.button`
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -567,6 +582,23 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
         {like.user.displayName.charAt(0).toUpperCase()}
       </LikeAvatar>
     ));
+  };
+
+  const getAlbumStats = (albumTracks: Track[]) => {
+    let totalLikes = 0;
+    let totalComments = 0;
+
+    albumTracks.forEach((track) => {
+      // Count likes from local state or server data
+      const likes = trackLikes[track.id] || track.likes || [];
+      totalLikes += likes.length;
+
+      // Count comments from local state
+      const comments = trackComments[track.id] || [];
+      totalComments += comments.length;
+    });
+
+    return { totalLikes, totalComments };
   };
 
   const fetchTrackComments = useCallback(
@@ -928,6 +960,7 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
             {Object.entries(albumGroups).map(([albumId, albumTracks]) => {
               const album = albumTracks[0].album;
               const isCollapsed = collapsedAlbums[albumId] === true;
+              const albumStats = getAlbumStats(albumTracks);
 
               return (
                 <AlbumSection key={albumId}>
@@ -949,6 +982,14 @@ const TrackList: React.FC<TrackListProps> = ({ tracks, playlistId }) => {
                           .map((artist) => artist.name)
                           .join(", ")}
                       </AlbumMeta>
+                      <AlbumStats>
+                        <AlbumStatItem>
+                          💬 {albumStats.totalComments}
+                        </AlbumStatItem>
+                        <AlbumStatItem>
+                          ❤️ {albumStats.totalLikes}
+                        </AlbumStatItem>
+                      </AlbumStats>
                     </AlbumInfo>
 
                     <CollapseButton>
