@@ -12,7 +12,7 @@ import PageHeader, { UserName } from "./PageHeader";
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
-  padding: 20px;
+  padding: 40px;
 `;
 
 const PlaylistsGrid = styled.div`

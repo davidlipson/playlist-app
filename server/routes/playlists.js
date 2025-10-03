@@ -51,6 +51,14 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
           dbPlaylist = dbPlaylist[0]; // findOrCreate returns [instance, created]
         }
 
+        // Get collaborators for this playlist
+        const collaborators = await SharedPlaylist.findAll({
+          where: { playlistId: dbPlaylist.id },
+          include: [
+            { model: User, as: "sharedWithUser", attributes: ["id", "displayName"] },
+          ],
+        });
+
         return {
           id: dbPlaylist.id,
           spotifyId: spotifyPlaylist.id,
@@ -61,6 +69,10 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
             id: spotifyPlaylist.owner.id,
             displayName: spotifyPlaylist.owner.display_name,
           },
+          collaborators: collaborators.map((collab) => ({
+            id: collab.sharedWithUser.id,
+            displayName: collab.sharedWithUser.displayName,
+          })),
           tracks: spotifyPlaylist.tracks,
           isPublic: dbPlaylist.isPublic,
           shareCode: dbPlaylist.shareCode,
@@ -110,23 +122,39 @@ router.get("/shared-playlists", authenticateToken, async (req, res) => {
       ],
     });
 
-    const playlists = sharedPlaylists.map((shared) => ({
-      id: shared.playlist.id,
-      spotifyId: shared.playlist.spotifyPlaylistId,
-      name: shared.playlist.name,
-      description: shared.playlist.description,
-      imageUrl: shared.playlist.imageUrl,
-      owner: {
-        id: shared.playlist.owner.id,
-        displayName: shared.playlist.owner.displayName,
-      },
-      isPublic: shared.playlist.isPublic,
-      shareCode: shared.playlist.shareCode,
-      commentCount: shared.playlist.comments.length,
-      likeCount: shared.playlist.likes.length,
-      createdAt: shared.playlist.createdAt,
-      sharedAt: shared.createdAt,
-    }));
+    // Get collaborators for all shared playlists
+    const playlists = await Promise.all(
+      sharedPlaylists.map(async (shared) => {
+        const collaborators = await SharedPlaylist.findAll({
+          where: { playlistId: shared.playlist.id },
+          include: [
+            { model: User, as: "sharedWithUser", attributes: ["id", "displayName"] },
+          ],
+        });
+
+        return {
+          id: shared.playlist.id,
+          spotifyId: shared.playlist.spotifyPlaylistId,
+          name: shared.playlist.name,
+          description: shared.playlist.description,
+          imageUrl: shared.playlist.imageUrl,
+          owner: {
+            id: shared.playlist.owner.id,
+            displayName: shared.playlist.owner.displayName,
+          },
+          collaborators: collaborators.map((collab) => ({
+            id: collab.sharedWithUser.id,
+            displayName: collab.sharedWithUser.displayName,
+          })),
+          isPublic: shared.playlist.isPublic,
+          shareCode: shared.playlist.shareCode,
+          commentCount: shared.playlist.comments.length,
+          likeCount: shared.playlist.likes.length,
+          createdAt: shared.playlist.createdAt,
+          sharedAt: shared.createdAt,
+        };
+      })
+    );
 
     res.json({ playlists });
   } catch (error) {
