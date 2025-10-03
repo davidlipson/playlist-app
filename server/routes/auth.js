@@ -75,7 +75,9 @@ router.post("/spotify-callback", async (req, res) => {
 
     // Check if this code has already been processed
     if (processedCodes.has(code)) {
-      console.log("Authorization code already processed, ignoring duplicate request");
+      console.log(
+        "Authorization code already processed, ignoring duplicate request"
+      );
       return res.status(400).json({ error: "Authorization code already used" });
     }
 
