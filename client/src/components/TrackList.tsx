@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { useSpotify } from "../contexts/SpotifyContext";
@@ -450,6 +450,8 @@ const TrackList: React.FC<TrackListProps> = ({
   const [capturedTimestamps, setCapturedTimestamps] = useState<{
     [trackId: string]: number;
   }>({});
+  const [hasAutoScrolled, setHasAutoScrolled] = useState(false);
+  const trackRefs = useRef<{ [trackId: string]: HTMLDivElement | null }>({});
 
   // Group tracks by album
   const albumGroups = useMemo(() => {
@@ -801,6 +803,33 @@ const TrackList: React.FC<TrackListProps> = ({
     fetchAllComments();
   }, [fetchAllComments]);
 
+  // Reset auto-scroll flag when playlist changes
+  useEffect(() => {
+    setHasAutoScrolled(false);
+    trackRefs.current = {};
+  }, [playlistId]);
+
+  // Auto-scroll to currently playing track on first load
+  useEffect(() => {
+    if (
+      currentTrack &&
+      !hasAutoScrolled &&
+      tracks.some((track) => track.id === currentTrack.id)
+    ) {
+      const trackElement = trackRefs.current[currentTrack.id];
+      if (trackElement) {
+        // Use setTimeout to ensure the element is rendered
+        setTimeout(() => {
+          trackElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          setHasAutoScrolled(true);
+        }, 100);
+      }
+    }
+  }, [currentTrack, hasAutoScrolled, tracks]);
+
   // Close comment menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -832,6 +861,7 @@ const TrackList: React.FC<TrackListProps> = ({
     return (
       <TrackItem
         key={track.id}
+        ref={(el) => (trackRefs.current[track.id] = el)}
         isPlaying={isTrackPlaying(track)}
         hasOpenComments={hasOpenComments}
         onClick={() => handleTrackClick(track)}
