@@ -35,6 +35,16 @@ const NowPlayingTrackName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 2px;
+  max-width: 100%;
+`;
+
+const NowPlayingArtists = styled.div`
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 `;
 
 const ProgressContainer = styled.div`
@@ -288,10 +298,10 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
         <NowPlayingTrackName>
           {currentTrack?.name || "No track playing"}
         </NowPlayingTrackName>
-        <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.7)" }}>
+        <NowPlayingArtists>
           {currentTrack?.artists?.map((artist) => artist.name).join(", ") ||
             "Start listening in Spotify"}
-        </div>
+        </NowPlayingArtists>
       </NowPlayingInfo>
     </NowPlayingContainer>
   );
