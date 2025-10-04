@@ -120,7 +120,6 @@ interface PlaylistData {
 }
 
 const PlaylistView: React.FC = () => {
-  console.log("PlaylistView component rendering");
   const { playlistId, shareCode } = useParams();
   const [playlist, setPlaylist] = useState<PlaylistData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -131,12 +130,6 @@ const PlaylistView: React.FC = () => {
   const { logout } = useAuth();
 
   const fetchPlaylist = useCallback(async () => {
-    console.log(
-      "fetchPlaylist called with playlistId:",
-      playlistId,
-      "shareCode:",
-      shareCode
-    );
     try {
       let url = "";
       if (shareCode) {

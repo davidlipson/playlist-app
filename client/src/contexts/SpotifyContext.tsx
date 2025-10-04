@@ -42,7 +42,6 @@ interface SpotifyProviderProps {
 export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   children,
 }) => {
-  console.log("SpotifyProvider component rendering");
   const [spotifyApi] = useState(() => new SpotifyWebApi());
   const [currentTrack, setCurrentTrack] =
     useState<SpotifyApi.TrackObjectFull | null>(null);
@@ -53,33 +52,25 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   useEffect(() => {
     const fetchSpotifyToken = async () => {
       try {
-        console.log("Fetching Spotify access token from server...");
         const response = await axios.get("/api/auth/spotify-token");
         const { accessToken } = response.data;
 
         if (accessToken) {
           spotifyApi.setAccessToken(accessToken);
-          console.log("Spotify API access token set from server");
-          console.log("Token value:", accessToken.substring(0, 20) + "...");
 
           // Test the token immediately to see if it's valid
           spotifyApi
             .getMe()
             .then(() => {
-              console.log("Spotify token is valid");
             })
             .catch((error) => {
               console.error("Spotify token validation failed:", error);
               if (error.error?.status === 401) {
-                console.log(
-                  "Spotify token is invalid - user needs to re-authenticate"
-                );
                 localStorage.removeItem("token");
                 window.location.href = "/";
               }
             });
         } else {
-          console.log("No Spotify access token found on server");
         }
       } catch (error) {
         console.error("Failed to fetch Spotify token:", error);
@@ -87,7 +78,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
         if (error && typeof error === "object" && "response" in error) {
           const axiosError = error as any;
           if (axiosError.response?.status === 401) {
-            console.log("JWT token is invalid - redirecting to login");
             localStorage.removeItem("token");
             window.location.href = "/";
           }
@@ -101,18 +91,14 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
 
   // Global polling for current Spotify playback state
   useEffect(() => {
-    console.log("SpotifyContext: Setting up global Spotify state polling");
     const interval = setInterval(() => {
-      console.log("SpotifyContext: Polling for current Spotify state...");
       getCurrentState();
     }, 2000); // 2 seconds for position updates
 
     // Also check immediately when component mounts
-    console.log("SpotifyContext: Initial getCurrentState call");
     getCurrentState();
 
     return () => {
-      console.log("SpotifyContext: Cleaning up global Spotify state polling");
       clearInterval(interval);
     };
   }, []); // getCurrentState is stable and doesn't need to be in dependencies
@@ -125,9 +111,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     startIndex?: number
   ) => {
     try {
-      console.log("Playing track:", trackUri);
-      console.log("Playlist tracks:", playlistTracks);
-      console.log("Start index:", startIndex);
 
       if (playlistTracks && playlistTracks.length > 0) {
         // Play the entire playlist starting from the selected track
@@ -137,36 +120,18 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
             : playlistTracks.indexOf(trackUri);
         const tracksToPlay = playlistTracks.slice(startIndexToUse);
 
-        console.log("🎵 Playlist Queue Debug:");
-        console.log("  - Total playlist tracks:", playlistTracks.length);
-        console.log("  - Selected track URI:", trackUri);
-        console.log("  - Start index:", startIndexToUse);
-        console.log(
-          "  - Tracks to play (from index",
-          startIndexToUse,
-          "to end):",
-          tracksToPlay.length
-        );
-        console.log("  - First track in queue:", tracksToPlay[0]);
-        console.log(
-          "  - Last track in queue:",
-          tracksToPlay[tracksToPlay.length - 1]
-        );
 
         // Clear existing queue and play new tracks (spotifyApi.play with uris replaces the queue)
-        console.log("🔄 Clearing existing queue and playing new tracks...");
         await spotifyApi.play({
           uris: tracksToPlay,
         });
       } else {
         // Fallback to single track play (also clears existing queue)
-        console.log("🔄 Playing single track (clearing existing queue)...");
         await spotifyApi.play({
           uris: [trackUri],
         });
       }
 
-      console.log("Track should now be playing");
     } catch (error) {
       console.error("Error playing track:", error);
       throw error; // Re-throw so the UI can handle it
@@ -198,30 +163,14 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   };
 
   const getCurrentState = useCallback(async () => {
-    console.log("getCurrentState function called");
     try {
-      console.log("Calling getMyCurrentPlaybackState...");
-      console.log(
-        "Spotify API access token:",
-        spotifyApi.getAccessToken() ? "Set" : "Not set"
-      );
-      console.log("Spotify API instance:", spotifyApi);
-      console.log(
-        "Available methods:",
-        Object.getOwnPropertyNames(Object.getPrototypeOf(spotifyApi))
-      );
 
       // Test if API is working with a simple call
       try {
-        console.log("Testing API with getUserProfile...");
         const profilePromise = spotifyApi.getMe();
-        console.log("Profile promise created, waiting...");
 
         // Add a simple timeout to see if API is hanging
         const profileTimeoutId = setTimeout(() => {
-          console.log(
-            "Profile API call is taking too long, might be hanging..."
-          );
         }, 2000);
 
         const profileTimeout = new Promise((_, reject) =>
@@ -232,7 +181,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
           profileTimeout,
         ])) as any;
         clearTimeout(profileTimeoutId);
-        console.log("User profile test successful:", profile.display_name);
       } catch (profileError) {
         console.error("Profile test failed:", profileError);
         if (profileError instanceof Error) {
@@ -247,9 +195,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
         ) {
           const error = profileError as any;
           if (error.error?.status === 401) {
-            console.log(
-              "Invalid access token detected in profile test - clearing and redirecting to login"
-            );
             localStorage.removeItem("token");
             window.location.href = "/";
             return; // Exit early to prevent further API calls
@@ -257,39 +202,21 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
         }
       }
 
-      console.log("About to call getMyCurrentPlaybackState...");
       const apiPromise = spotifyApi.getMyCurrentPlaybackState();
-      console.log("API promise created, waiting for response...");
 
       // Add a simple timeout to see if API is hanging
       const timeoutId = setTimeout(() => {
-        console.log("API call is taking too long, might be hanging...");
       }, 3000);
 
       try {
-        console.log("Waiting for API response...");
         const state = await apiPromise;
         clearTimeout(timeoutId);
-        console.log("Playback state response:", state);
 
         if (state && state.item) {
           setCurrentTrack(state.item as SpotifyApi.TrackObjectFull);
           setIsPlaying(state.is_playing);
           setPosition(state.progress_ms || 0);
-          console.log(
-            "Updated state - track:",
-            state.item?.name,
-            "playing:",
-            state.is_playing,
-            "position:",
-            state.progress_ms,
-            "duration:",
-            state.item?.duration_ms
-          );
         } else {
-          console.log(
-            "No playback state returned (user might not be playing anything)"
-          );
           setCurrentTrack(null);
           setIsPlaying(false);
           setPosition(0);
@@ -304,13 +231,9 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
         if (apiError && typeof apiError === "object" && "error" in apiError) {
           const error = apiError as any;
           if (error.error?.status === 401) {
-            console.log(
-              "Invalid access token - clearing and redirecting to login"
-            );
             localStorage.removeItem("token");
             window.location.href = "/";
           } else if (error.error?.status === 429) {
-            console.log("Rate limited by Spotify API - backing off");
             // Don't throw error, just log and continue
             // The interval will retry later
           }

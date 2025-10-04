@@ -300,7 +300,7 @@ const AlbumName = styled.div<{ isPlaying: boolean }>`
 
 const AlbumMeta = styled.div<{ isPlaying: boolean }>`
   font-size: 14px;
-  color: ${(props) => 
+  color: ${(props) =>
     props.isPlaying ? "rgba(29, 185, 84, 0.8)" : "rgba(255, 255, 255, 0.7)"};
   white-space: nowrap;
   overflow: hidden;
@@ -412,7 +412,6 @@ const TrackList: React.FC<TrackListProps> = ({
   collaborators,
   playlistOwner,
 }) => {
-  console.log("TrackList component rendering with playlistId:", playlistId);
   const { playTrack, currentTrack, isPlaying, position, getCurrentState } =
     useSpotify();
   const { user } = useAuth();
@@ -470,8 +469,8 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Check if any track in an album is currently playing
   const isAlbumPlaying = (albumTracks: Track[]) => {
-    return albumTracks.some(track => 
-      currentTrack && track.id === currentTrack.id && isPlaying
+    return albumTracks.some(
+      (track) => currentTrack && track.id === currentTrack.id && isPlaying
     );
   };
 
@@ -512,11 +511,6 @@ const TrackList: React.FC<TrackListProps> = ({
       // Find the index of the clicked track
       const trackIndex = tracks.findIndex((t) => t.id === track.id);
 
-      console.log("🎯 Track Click Debug:");
-      console.log("  - Clicked track:", track.name);
-      console.log("  - Track index in playlist:", trackIndex);
-      console.log("  - Total tracks in playlist:", tracks.length);
-      console.log("  - Will play from track", trackIndex + 1, "to end");
 
       await playTrack(trackUri, playlistTrackUris, trackIndex);
     } catch (error) {
@@ -626,7 +620,6 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Load all comments for all tracks when component mounts
   const fetchAllComments = useCallback(async () => {
-    console.log("fetchAllComments called with playlistId:", playlistId);
     try {
       const response = await axios.get(`/api/comments/playlist/${playlistId}`);
       const commentsByTrack: { [trackId: string]: any[] } = {};
@@ -807,7 +800,6 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Load all comments when component mounts
   useEffect(() => {
-    console.log("fetchAllComments useEffect running");
     fetchAllComments();
   }, [fetchAllComments]);
 
@@ -830,9 +822,6 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Debug current track and playing state
   useEffect(() => {
-    console.log("Current track changed:", currentTrack);
-    console.log("Is playing:", isPlaying);
-    console.log("Position:", position);
   }, [currentTrack, isPlaying, position]);
 
   // No auto-open comments - users must manually open comment sections
@@ -1290,7 +1279,10 @@ const TrackList: React.FC<TrackListProps> = ({
 
               return (
                 <AlbumSection key={albumId}>
-                  <AlbumHeader isPlaying={isPlaying} onClick={() => toggleAlbumCollapse(albumId)}>
+                  <AlbumHeader
+                    isPlaying={isPlaying}
+                    onClick={() => toggleAlbumCollapse(albumId)}
+                  >
                     <AlbumImage>
                       {album.imageUrl ? (
                         <AlbumImageSrc src={album.imageUrl} alt={album.name} />
