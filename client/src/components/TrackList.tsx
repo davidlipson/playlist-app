@@ -645,6 +645,21 @@ const TrackList: React.FC<TrackListProps> = ({
       });
       // Refresh all comments to show the new one
       await fetchAllComments();
+      
+      // Dispatch custom event for real-time updates
+      const newComment = {
+        id: Date.now().toString(), // Temporary ID until we get the real one
+        trackId,
+        playlistId,
+        content,
+        inSongTimestamp: capturedTimestamps[trackId] || null,
+        user: { id: user?.id, displayName: user?.displayName },
+        playlist: { id: playlistId }
+      };
+      
+      window.dispatchEvent(new CustomEvent('commentAdded', {
+        detail: { comment: newComment, trackId }
+      }));
     } catch (error) {
       console.error("Failed to add comment:", error);
       alert("Failed to add comment. Please try again.");
@@ -865,7 +880,7 @@ const TrackList: React.FC<TrackListProps> = ({
                 toggleCommentForm(track.id);
               }}
               title={
-                capturedTimestamps[track.id]
+                capturedTimestamps[track.id] && capturedTimestamps[track.id] > 0
                   ? `Comment will be timestamped at ${Math.floor(
                       capturedTimestamps[track.id] / 60
                     )}:${(capturedTimestamps[track.id] % 60)
@@ -874,7 +889,7 @@ const TrackList: React.FC<TrackListProps> = ({
                   : "Toggle comments"
               }
             >
-              {capturedTimestamps[track.id] ? "⏰" : "💬"}
+              {capturedTimestamps[track.id] && capturedTimestamps[track.id] > 0 ? "⏰" : "💬"}
             </CommentButton>
           </TrackLikesButtons>
           <UserList users={getLikeUsers(track)} variant="small" />
@@ -1121,7 +1136,7 @@ const TrackList: React.FC<TrackListProps> = ({
         {/* Comment Form */}
         {showForm && (
           <div style={{ paddingLeft: "115px", paddingRight: "20px" }}>
-            {capturedTimestamps[track.id] && (
+            {capturedTimestamps[track.id] && capturedTimestamps[track.id] > 0 && (
               <div
                 style={{
                   color: "rgba(255, 255, 255, 0.8)",
