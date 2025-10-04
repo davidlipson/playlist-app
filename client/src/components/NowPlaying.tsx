@@ -25,6 +25,9 @@ const NowPlayingContainer = styled.div`
 
 const NowPlayingInfo = styled.div`
   text-align: center;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
 `;
 
 const NowPlayingTrackName = styled.div`
@@ -35,7 +38,8 @@ const NowPlayingTrackName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 2px;
-  max-width: 100%;
+  width: 100%;
+  min-width: 0;
 `;
 
 const NowPlayingArtists = styled.div`
@@ -44,7 +48,8 @@ const NowPlayingArtists = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  width: 100%;
+  min-width: 0;
 `;
 
 const ProgressContainer = styled.div`
