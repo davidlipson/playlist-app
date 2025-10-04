@@ -61,8 +61,7 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
           // Test the token immediately to see if it's valid
           spotifyApi
             .getMe()
-            .then(() => {
-            })
+            .then(() => {})
             .catch((error) => {
               console.error("Spotify token validation failed:", error);
               if (error.error?.status === 401) {
@@ -111,7 +110,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     startIndex?: number
   ) => {
     try {
-
       if (playlistTracks && playlistTracks.length > 0) {
         // Play the entire playlist starting from the selected track
         const startIndexToUse =
@@ -119,7 +117,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
             ? startIndex
             : playlistTracks.indexOf(trackUri);
         const tracksToPlay = playlistTracks.slice(startIndexToUse);
-
 
         // Clear existing queue and play new tracks (spotifyApi.play with uris replaces the queue)
         await spotifyApi.play({
@@ -131,7 +128,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
           uris: [trackUri],
         });
       }
-
     } catch (error) {
       console.error("Error playing track:", error);
       throw error; // Re-throw so the UI can handle it
@@ -164,14 +160,12 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
 
   const getCurrentState = useCallback(async () => {
     try {
-
       // Test if API is working with a simple call
       try {
         const profilePromise = spotifyApi.getMe();
 
         // Add a simple timeout to see if API is hanging
-        const profileTimeoutId = setTimeout(() => {
-        }, 2000);
+        const profileTimeoutId = setTimeout(() => {}, 2000);
 
         const profileTimeout = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Profile API timeout")), 5000)
@@ -205,8 +199,7 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
       const apiPromise = spotifyApi.getMyCurrentPlaybackState();
 
       // Add a simple timeout to see if API is hanging
-      const timeoutId = setTimeout(() => {
-      }, 3000);
+      const timeoutId = setTimeout(() => {}, 3000);
 
       try {
         const state = await apiPromise;

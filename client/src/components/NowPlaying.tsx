@@ -147,14 +147,12 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
         return;
       }
 
-
       try {
         // Try to get comments from the passed trackComments prop first
         if (trackComments[currentTrack.id]) {
           setCurrentTrackComments(trackComments[currentTrack.id]);
           return;
         }
-
 
         // Fetch all comments for this track across all playlists
         const response = await axios.get(
@@ -191,7 +189,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
 
       // Only update if it's for the currently playing track
       if (currentTrack && trackId === currentTrack.id) {
-
         // Filter by current playlist if specified
         if (
           currentPlaylistId &&
