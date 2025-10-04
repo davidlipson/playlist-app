@@ -412,7 +412,6 @@ const TrackList: React.FC<TrackListProps> = ({
   collaborators,
   playlistOwner,
 }) => {
-  console.log("TrackList component rendering with playlistId:", playlistId);
   const { playTrack, currentTrack, isPlaying, position, getCurrentState } =
     useSpotify();
   const { user } = useAuth();
@@ -512,11 +511,6 @@ const TrackList: React.FC<TrackListProps> = ({
       // Find the index of the clicked track
       const trackIndex = tracks.findIndex((t) => t.id === track.id);
 
-      console.log("🎯 Track Click Debug:");
-      console.log("  - Clicked track:", track.name);
-      console.log("  - Track index in playlist:", trackIndex);
-      console.log("  - Total tracks in playlist:", tracks.length);
-      console.log("  - Will play from track", trackIndex + 1, "to end");
 
       await playTrack(trackUri, playlistTrackUris, trackIndex);
     } catch (error) {
@@ -626,7 +620,6 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Load all comments for all tracks when component mounts
   const fetchAllComments = useCallback(async () => {
-    console.log("fetchAllComments called with playlistId:", playlistId);
     try {
       const response = await axios.get(`/api/comments/playlist/${playlistId}`);
       const commentsByTrack: { [trackId: string]: any[] } = {};
@@ -807,7 +800,6 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Load all comments when component mounts
   useEffect(() => {
-    console.log("fetchAllComments useEffect running");
     fetchAllComments();
   }, [fetchAllComments]);
 
@@ -830,9 +822,6 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Debug current track and playing state
   useEffect(() => {
-    console.log("Current track changed:", currentTrack);
-    console.log("Is playing:", isPlaying);
-    console.log("Position:", position);
   }, [currentTrack, isPlaying, position]);
 
   // No auto-open comments - users must manually open comment sections

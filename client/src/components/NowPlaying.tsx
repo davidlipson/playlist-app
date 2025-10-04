@@ -143,12 +143,10 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
   useEffect(() => {
     const fetchCurrentTrackComments = async () => {
       if (!currentTrack) {
-        console.log("🎵 No current track, clearing comments");
         setCurrentTrackComments([]);
         return;
       }
 
-      console.log(
         "🎵 Fetching comments for track:",
         currentTrack.name,
         "ID:",
@@ -158,7 +156,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
       try {
         // Try to get comments from the passed trackComments prop first
         if (trackComments[currentTrack.id]) {
-          console.log(
             "🎵 Using comments from props:",
             trackComments[currentTrack.id].length,
             "comments"
@@ -167,18 +164,13 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
           return;
         }
 
-        console.log("🎵 No comments in props, fetching from server...");
 
         // Fetch all comments for this track across all playlists
-        console.log(
           "🎵 Making API call to /api/comments/track/" + currentTrack.id + "..."
         );
         const response = await axios.get(
           `/api/comments/track/${currentTrack.id}`
         );
-        console.log("🎵 API response received:", response.status);
-        console.log("🎵 Fetched comments:", response.data.length, "comments");
-        console.log("🎵 All comments:", response.data);
 
         // Filter comments by current playlist if specified
         let filteredComments = response.data;
@@ -187,14 +179,12 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
             (comment: any) =>
               comment.playlist && comment.playlist.id === currentPlaylistId
           );
-          console.log(
             "🎵 Filtered to current playlist comments:",
             filteredComments.length,
             "comments"
           );
         }
 
-        console.log(
           "🎵 Comments with inSongTimestamp:",
           filteredComments.filter(
             (c: any) => c.inSongTimestamp && c.inSongTimestamp > 0
@@ -218,33 +208,38 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
   useEffect(() => {
     const handleNewComment = (event: CustomEvent) => {
       const { comment, trackId } = event.detail;
-      
+
       // Only update if it's for the currently playing track
       if (currentTrack && trackId === currentTrack.id) {
-        console.log("🆕 New comment added to current track:", comment);
-        
+
         // Filter by current playlist if specified
-        if (currentPlaylistId && comment.playlist && comment.playlist.id !== currentPlaylistId) {
+        if (
+          currentPlaylistId &&
+          comment.playlist &&
+          comment.playlist.id !== currentPlaylistId
+        ) {
           return; // Don't add comment from different playlist
         }
-        
+
         // Add the new comment to the current comments
-        setCurrentTrackComments(prevComments => {
+        setCurrentTrackComments((prevComments) => {
           // Check if comment already exists (avoid duplicates)
-          const exists = prevComments.some(c => c.id === comment.id);
+          const exists = prevComments.some((c) => c.id === comment.id);
           if (exists) return prevComments;
-          
-          console.log("➕ Adding new comment to timeline");
+
           return [...prevComments, comment];
         });
       }
     };
 
     // Listen for the custom event
-    window.addEventListener('commentAdded', handleNewComment as EventListener);
-    
+    window.addEventListener("commentAdded", handleNewComment as EventListener);
+
     return () => {
-      window.removeEventListener('commentAdded', handleNewComment as EventListener);
+      window.removeEventListener(
+        "commentAdded",
+        handleNewComment as EventListener
+      );
     };
   }, [currentTrack, currentPlaylistId]);
 
@@ -254,7 +249,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
     const timestampedComments = currentTrackComments.filter(
       (comment: any) => comment.inSongTimestamp && comment.inSongTimestamp > 0
     );
-    console.log(
       "🎵 Timestamped comments for current track:",
       timestampedComments.length
     );
@@ -275,41 +269,42 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
                 : 0
             }
           />
-          {currentTrack && getTimestampedCommentsForCurrentTrack().map((comment: any) => {
-            const positionPercent =
-              currentTrack && currentTrack.duration_ms > 0
-                ? ((comment.inSongTimestamp * 1000) /
-                    currentTrack.duration_ms) *
-                  100
-                : 0;
+          {currentTrack &&
+            getTimestampedCommentsForCurrentTrack().map((comment: any) => {
+              const positionPercent =
+                currentTrack && currentTrack.duration_ms > 0
+                  ? ((comment.inSongTimestamp * 1000) /
+                      currentTrack.duration_ms) *
+                    100
+                  : 0;
 
-            return (
-              <CommentIndicator
-                key={comment.id}
-                position={positionPercent}
-                onMouseEnter={() => setHoveredCommentId(comment.id)}
-                onMouseLeave={() => setHoveredCommentId(null)}
-              >
-                <CommentTooltip isVisible={hoveredCommentId === comment.id}>
-                  <div style={{ fontWeight: "600", marginBottom: "4px" }}>
-                    {comment.user.displayName}
-                  </div>
-                  <div style={{ fontSize: "11px", opacity: 0.8 }}>
-                    {formatTimestamp(comment.inSongTimestamp)}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "4px",
-                      maxWidth: "180px",
-                      whiteSpace: "normal",
-                    }}
-                  >
-                    {comment.content}
-                  </div>
-                </CommentTooltip>
-              </CommentIndicator>
-            );
-          })}
+              return (
+                <CommentIndicator
+                  key={comment.id}
+                  position={positionPercent}
+                  onMouseEnter={() => setHoveredCommentId(comment.id)}
+                  onMouseLeave={() => setHoveredCommentId(null)}
+                >
+                  <CommentTooltip isVisible={hoveredCommentId === comment.id}>
+                    <div style={{ fontWeight: "600", marginBottom: "4px" }}>
+                      {comment.user.displayName}
+                    </div>
+                    <div style={{ fontSize: "11px", opacity: 0.8 }}>
+                      {formatTimestamp(comment.inSongTimestamp)}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: "4px",
+                        maxWidth: "180px",
+                        whiteSpace: "normal",
+                      }}
+                    >
+                      {comment.content}
+                    </div>
+                  </CommentTooltip>
+                </CommentIndicator>
+              );
+            })}
         </ProgressBar>
         <TimeDisplay>
           {currentTrack ? formatDuration(currentTrack.duration_ms) : "0:00"}
@@ -321,7 +316,8 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
           {currentTrack?.name || "No track playing"}
         </NowPlayingTrackName>
         <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.7)" }}>
-          {currentTrack?.artists?.map((artist) => artist.name).join(", ") || "Start playing music to see comments"}
+          {currentTrack?.artists?.map((artist) => artist.name).join(", ") ||
+            "Start listening in Spotify"}
         </div>
       </NowPlayingInfo>
     </NowPlayingContainer>
