@@ -230,16 +230,36 @@ const LikeButton = styled.button<{ isLiked: boolean }>`
 
 const AlbumSection = styled.div``;
 
-const AlbumHeader = styled.div`
+const AlbumHeader = styled.div<{ isPlaying: boolean }>`
   display: flex;
   align-items: center;
   padding: 15px 20px;
-  background: rgba(255, 255, 255, 0.05);
+  background: ${(props) =>
+    props.isPlaying
+      ? "linear-gradient(135deg, rgba(29, 185, 84, 0.3), rgba(30, 215, 96, 0.2))"
+      : "rgba(255, 255, 255, 0.05)"};
   cursor: pointer;
   transition: all 0.3s ease;
+  border-left: ${(props) =>
+    props.isPlaying ? "4px solid #1db954" : "4px solid transparent"};
+  position: relative;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: ${(props) =>
+      props.isPlaying
+        ? "linear-gradient(135deg, rgba(29, 185, 84, 0.4), rgba(30, 215, 96, 0.3))"
+        : "rgba(255, 255, 255, 0.1)"};
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: ${(props) => (props.isPlaying ? "#1db954" : "transparent")};
+    transition: all 0.3s ease;
   }
 `;
 
@@ -267,22 +287,25 @@ const AlbumInfo = styled.div`
   min-width: 0;
 `;
 
-const AlbumName = styled.div`
-  font-weight: 600;
-  color: white;
+const AlbumName = styled.div<{ isPlaying: boolean }>`
+  font-weight: ${(props) => (props.isPlaying ? "700" : "600")};
+  color: ${(props) => (props.isPlaying ? "#1db954" : "white")};
   font-size: 16px;
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
 `;
 
-const AlbumMeta = styled.div`
+const AlbumMeta = styled.div<{ isPlaying: boolean }>`
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: ${(props) => 
+    props.isPlaying ? "rgba(29, 185, 84, 0.8)" : "rgba(255, 255, 255, 0.7)"};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.3s ease;
 `;
 
 const AlbumStats = styled.div`
@@ -444,6 +467,13 @@ const TrackList: React.FC<TrackListProps> = ({
 
     return groups;
   }, [tracks]);
+
+  // Check if any track in an album is currently playing
+  const isAlbumPlaying = (albumTracks: Track[]) => {
+    return albumTracks.some(track => 
+      currentTrack && track.id === currentTrack.id && isPlaying
+    );
+  };
 
   // Initialize all albums as collapsed when tracks change
   useEffect(() => {
@@ -1256,10 +1286,11 @@ const TrackList: React.FC<TrackListProps> = ({
               const album = albumTracks[0].album;
               const isCollapsed = collapsedAlbums[albumId] === true;
               const albumStats = getAlbumStats(albumTracks);
+              const isPlaying = isAlbumPlaying(albumTracks);
 
               return (
                 <AlbumSection key={albumId}>
-                  <AlbumHeader onClick={() => toggleAlbumCollapse(albumId)}>
+                  <AlbumHeader isPlaying={isPlaying} onClick={() => toggleAlbumCollapse(albumId)}>
                     <AlbumImage>
                       {album.imageUrl ? (
                         <AlbumImageSrc src={album.imageUrl} alt={album.name} />
@@ -1269,8 +1300,8 @@ const TrackList: React.FC<TrackListProps> = ({
                     </AlbumImage>
 
                     <AlbumInfo>
-                      <AlbumName>{album.name}</AlbumName>
-                      <AlbumMeta>
+                      <AlbumName isPlaying={isPlaying}>{album.name}</AlbumName>
+                      <AlbumMeta isPlaying={isPlaying}>
                         {albumTracks.length} track
                         {albumTracks.length !== 1 ? "s" : ""} •{" "}
                         {albumTracks[0].artists
