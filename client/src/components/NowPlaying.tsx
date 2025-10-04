@@ -130,10 +130,14 @@ interface NowPlayingProps {
   currentPlaylistId?: string;
 }
 
-const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {}, currentPlaylistId }) => {
+const NowPlaying: React.FC<NowPlayingProps> = ({
+  trackComments = {},
+  currentPlaylistId,
+}) => {
   const { currentTrack, position } = useSpotify();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
+  const [lastCommentCount, setLastCommentCount] = useState<number>(0);
 
   // Fetch comments for the current track
   useEffect(() => {
@@ -175,16 +179,21 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {}, currentPlay
         console.log("🎵 API response received:", response.status);
         console.log("🎵 Fetched comments:", response.data.length, "comments");
         console.log("🎵 All comments:", response.data);
-        
+
         // Filter comments by current playlist if specified
         let filteredComments = response.data;
         if (currentPlaylistId) {
           filteredComments = response.data.filter(
-            (comment: any) => comment.playlist && comment.playlist.id === currentPlaylistId
+            (comment: any) =>
+              comment.playlist && comment.playlist.id === currentPlaylistId
           );
-          console.log("🎵 Filtered to current playlist comments:", filteredComments.length, "comments");
+          console.log(
+            "🎵 Filtered to current playlist comments:",
+            filteredComments.length,
+            "comments"
+          );
         }
-        
+
         console.log(
           "🎵 Comments with inSongTimestamp:",
           filteredComments.filter(
@@ -205,6 +214,40 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {}, currentPlay
     fetchCurrentTrackComments();
   }, [currentTrack, trackComments, currentPlaylistId]);
 
+  // Listen for new comments added by the current user
+  useEffect(() => {
+    const handleNewComment = (event: CustomEvent) => {
+      const { comment, trackId } = event.detail;
+      
+      // Only update if it's for the currently playing track
+      if (currentTrack && trackId === currentTrack.id) {
+        console.log("🆕 New comment added to current track:", comment);
+        
+        // Filter by current playlist if specified
+        if (currentPlaylistId && comment.playlist && comment.playlist.id !== currentPlaylistId) {
+          return; // Don't add comment from different playlist
+        }
+        
+        // Add the new comment to the current comments
+        setCurrentTrackComments(prevComments => {
+          // Check if comment already exists (avoid duplicates)
+          const exists = prevComments.some(c => c.id === comment.id);
+          if (exists) return prevComments;
+          
+          console.log("➕ Adding new comment to timeline");
+          return [...prevComments, comment];
+        });
+      }
+    };
+
+    // Listen for the custom event
+    window.addEventListener('commentAdded', handleNewComment as EventListener);
+    
+    return () => {
+      window.removeEventListener('commentAdded', handleNewComment as EventListener);
+    };
+  }, [currentTrack, currentPlaylistId]);
+
   // Get timestamped comments for the current track
   const getTimestampedCommentsForCurrentTrack = () => {
     if (!currentTrack) return [];
@@ -217,10 +260,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {}, currentPlay
     );
     return timestampedComments;
   };
-
-  if (!currentTrack) {
-    return null;
-  }
 
   return (
     <NowPlayingContainer>
@@ -236,7 +275,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {}, currentPlay
                 : 0
             }
           />
-          {getTimestampedCommentsForCurrentTrack().map((comment: any) => {
+          {currentTrack && getTimestampedCommentsForCurrentTrack().map((comment: any) => {
             const positionPercent =
               currentTrack && currentTrack.duration_ms > 0
                 ? ((comment.inSongTimestamp * 1000) /
@@ -282,7 +321,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({ trackComments = {}, currentPlay
           {currentTrack?.name || "No track playing"}
         </NowPlayingTrackName>
         <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.7)" }}>
-          {currentTrack?.artists?.map((artist) => artist.name).join(", ")}
+          {currentTrack?.artists?.map((artist) => artist.name).join(", ") || "Start playing music to see comments"}
         </div>
       </NowPlayingInfo>
     </NowPlayingContainer>
