@@ -115,7 +115,7 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
       console.log("SpotifyContext: Cleaning up global Spotify state polling");
       clearInterval(interval);
     };
-  }, [getCurrentState]);
+  }, []); // getCurrentState is stable and doesn't need to be in dependencies
 
   // No Web Playback SDK - using API-only approach
 
