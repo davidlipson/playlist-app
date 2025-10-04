@@ -298,10 +298,9 @@ const AlbumName = styled.div<{ isPlaying: boolean }>`
   transition: all 0.3s ease;
 `;
 
-const AlbumMeta = styled.div<{ isPlaying: boolean }>`
+const AlbumMeta = styled.div`
   font-size: 14px;
-  color: ${(props) => 
-    props.isPlaying ? "rgba(29, 185, 84, 0.8)" : "rgba(255, 255, 255, 0.7)"};
+  color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -469,8 +468,8 @@ const TrackList: React.FC<TrackListProps> = ({
 
   // Check if any track in an album is currently playing
   const isAlbumPlaying = (albumTracks: Track[]) => {
-    return albumTracks.some(track => 
-      currentTrack && track.id === currentTrack.id && isPlaying
+    return albumTracks.some(
+      (track) => currentTrack && track.id === currentTrack.id && isPlaying
     );
   };
 
@@ -510,7 +509,6 @@ const TrackList: React.FC<TrackListProps> = ({
 
       // Find the index of the clicked track
       const trackIndex = tracks.findIndex((t) => t.id === track.id);
-
 
       await playTrack(trackUri, playlistTrackUris, trackIndex);
     } catch (error) {
@@ -821,8 +819,7 @@ const TrackList: React.FC<TrackListProps> = ({
   // Note: Spotify state polling is now handled globally in SpotifyContext
 
   // Debug current track and playing state
-  useEffect(() => {
-  }, [currentTrack, isPlaying, position]);
+  useEffect(() => {}, [currentTrack, isPlaying, position]);
 
   // No auto-open comments - users must manually open comment sections
 
@@ -1279,7 +1276,10 @@ const TrackList: React.FC<TrackListProps> = ({
 
               return (
                 <AlbumSection key={albumId}>
-                  <AlbumHeader isPlaying={isPlaying} onClick={() => toggleAlbumCollapse(albumId)}>
+                  <AlbumHeader
+                    isPlaying={isPlaying}
+                    onClick={() => toggleAlbumCollapse(albumId)}
+                  >
                     <AlbumImage>
                       {album.imageUrl ? (
                         <AlbumImageSrc src={album.imageUrl} alt={album.name} />
@@ -1290,7 +1290,7 @@ const TrackList: React.FC<TrackListProps> = ({
 
                     <AlbumInfo>
                       <AlbumName isPlaying={isPlaying}>{album.name}</AlbumName>
-                      <AlbumMeta isPlaying={isPlaying}>
+                      <AlbumMeta>
                         {albumTracks.length} track
                         {albumTracks.length !== 1 ? "s" : ""} •{" "}
                         {albumTracks[0].artists
