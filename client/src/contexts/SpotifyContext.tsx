@@ -99,6 +99,24 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // spotifyApi is already memoized with useState
 
+  // Global polling for current Spotify playback state
+  useEffect(() => {
+    console.log("SpotifyContext: Setting up global Spotify state polling");
+    const interval = setInterval(() => {
+      console.log("SpotifyContext: Polling for current Spotify state...");
+      getCurrentState();
+    }, 2000); // 2 seconds for position updates
+
+    // Also check immediately when component mounts
+    console.log("SpotifyContext: Initial getCurrentState call");
+    getCurrentState();
+
+    return () => {
+      console.log("SpotifyContext: Cleaning up global Spotify state polling");
+      clearInterval(interval);
+    };
+  }, [getCurrentState]);
+
   // No Web Playback SDK - using API-only approach
 
   const playTrack = async (

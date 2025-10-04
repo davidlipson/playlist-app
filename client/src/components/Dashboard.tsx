@@ -169,6 +169,8 @@ const Dashboard: React.FC = () => {
     fetchSharedPlaylists();
   }, [fetchMyPlaylists, fetchSharedPlaylists]);
 
+  // Note: Spotify state polling is now handled globally in SpotifyContext
+
   const handlePlaylistClick = (playlist: Playlist) => {
     if (playlist.id) {
       navigate(`/playlist/${playlist.id}`);

@@ -645,7 +645,7 @@ const TrackList: React.FC<TrackListProps> = ({
       });
       // Refresh all comments to show the new one
       await fetchAllComments();
-      
+
       // Dispatch custom event for real-time updates
       const newComment = {
         id: Date.now().toString(), // Temporary ID until we get the real one
@@ -654,12 +654,14 @@ const TrackList: React.FC<TrackListProps> = ({
         content,
         inSongTimestamp: capturedTimestamps[trackId] || null,
         user: { id: user?.id, displayName: user?.displayName },
-        playlist: { id: playlistId }
+        playlist: { id: playlistId },
       };
-      
-      window.dispatchEvent(new CustomEvent('commentAdded', {
-        detail: { comment: newComment, trackId }
-      }));
+
+      window.dispatchEvent(
+        new CustomEvent("commentAdded", {
+          detail: { comment: newComment, trackId },
+        })
+      );
     } catch (error) {
       console.error("Failed to add comment:", error);
       alert("Failed to add comment. Please try again.");
@@ -794,26 +796,7 @@ const TrackList: React.FC<TrackListProps> = ({
     };
   }, []);
 
-  // Check current playing song every 2 seconds for position updates
-  useEffect(() => {
-    console.log(
-      "TrackList useEffect running - setting up interval for position polling"
-    );
-    const interval = setInterval(() => {
-      console.log("Polling for current state and position...");
-      getCurrentState();
-    }, 2000); // 2 seconds for position updates
-
-    // Also check immediately when component mounts
-    console.log("Initial getCurrentState call");
-    getCurrentState();
-
-    return () => {
-      console.log("TrackList useEffect cleanup - clearing interval");
-      clearInterval(interval);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Remove getCurrentState from dependencies to prevent infinite loop
+  // Note: Spotify state polling is now handled globally in SpotifyContext
 
   // Debug current track and playing state
   useEffect(() => {
@@ -889,7 +872,9 @@ const TrackList: React.FC<TrackListProps> = ({
                   : "Toggle comments"
               }
             >
-              {capturedTimestamps[track.id] && capturedTimestamps[track.id] > 0 ? "⏰" : "💬"}
+              {capturedTimestamps[track.id] && capturedTimestamps[track.id] > 0
+                ? "⏰"
+                : "💬"}
             </CommentButton>
           </TrackLikesButtons>
           <UserList users={getLikeUsers(track)} variant="small" />
@@ -1136,25 +1121,26 @@ const TrackList: React.FC<TrackListProps> = ({
         {/* Comment Form */}
         {showForm && (
           <div style={{ paddingLeft: "115px", paddingRight: "20px" }}>
-            {capturedTimestamps[track.id] && capturedTimestamps[track.id] > 0 && (
-              <div
-                style={{
-                  color: "rgba(255, 255, 255, 0.8)",
-                  fontSize: "12px",
-                  marginBottom: "5px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                }}
-              >
-                ⏰ Commenting on {Math.floor(capturedTimestamps[track.id] / 60)}
-                :
-                {(capturedTimestamps[track.id] % 60)
-                  .toString()
-                  .padStart(2, "0")}{" "}
-                in the song
-              </div>
-            )}
+            {capturedTimestamps[track.id] &&
+              capturedTimestamps[track.id] > 0 && (
+                <div
+                  style={{
+                    color: "rgba(255, 255, 255, 0.8)",
+                    fontSize: "12px",
+                    marginBottom: "5px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  ⏰ Commenting on{" "}
+                  {Math.floor(capturedTimestamps[track.id] / 60)}:
+                  {(capturedTimestamps[track.id] % 60)
+                    .toString()
+                    .padStart(2, "0")}{" "}
+                  in the song
+                </div>
+              )}
             <form
               onSubmit={(e) => handleCommentSubmit(track.id, e)}
               style={{
