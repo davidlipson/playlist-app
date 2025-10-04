@@ -167,7 +167,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
               comment.playlist && comment.playlist.id === currentPlaylistId
           );
         }
-
         setCurrentTrackComments(filteredComments);
       } catch (error: any) {
         console.error("🎵 Error fetching track comments:", error);
@@ -291,7 +290,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
         </NowPlayingTrackName>
         <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.7)" }}>
           {currentTrack?.artists?.map((artist) => artist.name).join(", ") ||
-            "Start playing music to see comments"}
+            "Start listening in Spotify"}
         </div>
       </NowPlayingInfo>
     </NowPlayingContainer>

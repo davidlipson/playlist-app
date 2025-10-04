@@ -45,7 +45,7 @@ const ShareButton = styled.button`
   }
 
   &:disabled {
-    background: #4a4a4a;
+    background:rgb(181, 181, 181);
     cursor: not-allowed;
   }
 `;

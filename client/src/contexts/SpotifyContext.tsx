@@ -117,7 +117,6 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
             ? startIndex
             : playlistTracks.indexOf(trackUri);
         const tracksToPlay = playlistTracks.slice(startIndexToUse);
-
         // Clear existing queue and play new tracks (spotifyApi.play with uris replaces the queue)
         await spotifyApi.play({
           uris: tracksToPlay,

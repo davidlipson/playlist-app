@@ -300,7 +300,7 @@ const AlbumName = styled.div<{ isPlaying: boolean }>`
 
 const AlbumMeta = styled.div`
   font-size: 14px;
-  color: "rgba(255, 255, 255, 0.7)";
+  color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
