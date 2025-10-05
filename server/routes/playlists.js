@@ -189,6 +189,15 @@ router.get("/:playlistId", authenticateToken, async (req, res) => {
       playlist = await Playlist.findOne({
         where: { spotifyPlaylistId: spotifyId },
       });
+    } else if (playlistId.match(/^[a-zA-Z0-9]{22}$/)) {
+      // This looks like a Spotify playlist ID (22 characters)
+      spotifyPlaylist = await spotifyService.getPlaylist(
+        req.user.accessToken,
+        playlistId
+      );
+      playlist = await Playlist.findOne({
+        where: { spotifyPlaylistId: playlistId },
+      });
     } else {
       playlist = await Playlist.findByPk(playlistId, {
         include: [
