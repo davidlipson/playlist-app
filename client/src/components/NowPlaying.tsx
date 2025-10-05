@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 import { useSpotify } from "../contexts/SpotifyContext";
 import { formatDuration, formatTimestamp } from "../utils/timeUtils";
 import axios from "axios";
@@ -152,6 +153,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
   playlistTracks = [],
 }) => {
   const { currentTrack, position, playTrack, seekToPosition } = useSpotify();
+  const navigate = useNavigate();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
   const [lastCommentCount, setLastCommentCount] = useState<number>(0);
@@ -250,6 +252,12 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
     if (!currentTrack) return;
 
     try {
+      // If we're on the dashboard (no currentPlaylistId), navigate to the playlist first
+      if (!currentPlaylistId && comment.playlist && comment.playlist.id) {
+        navigate(`/playlist/${comment.playlist.id}`);
+        return;
+      }
+
       // If the comment is for the currently playing track, just seek to the position
       if (comment.trackId === currentTrack.id) {
         const positionMs = comment.inSongTimestamp * 1000; // Convert seconds to milliseconds
