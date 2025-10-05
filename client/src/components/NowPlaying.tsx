@@ -256,15 +256,21 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
         await seekToPosition(positionMs);
       } else {
         // If it's a different track, play that track from the comment position
-        const targetTrack = playlistTracks.find((track: any) => track.id === comment.trackId);
+        const targetTrack = playlistTracks.find(
+          (track: any) => track.id === comment.trackId
+        );
         if (targetTrack && playlistTracks.length > 0) {
           const trackUri = `spotify:track:${comment.trackId}`;
-          const playlistTrackUris = playlistTracks.map((track: any) => `spotify:track:${track.id}`);
-          const trackIndex = playlistTracks.findIndex((track: any) => track.id === comment.trackId);
-          
+          const playlistTrackUris = playlistTracks.map(
+            (track: any) => `spotify:track:${track.id}`
+          );
+          const trackIndex = playlistTracks.findIndex(
+            (track: any) => track.id === comment.trackId
+          );
+
           // Play the track and then seek to the comment position
           await playTrack(trackUri, playlistTrackUris, trackIndex);
-          
+
           // Wait a moment for the track to start playing, then seek to position
           setTimeout(async () => {
             const positionMs = comment.inSongTimestamp * 1000;

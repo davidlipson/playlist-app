@@ -52,6 +52,12 @@ const NotificationDropdownContainer = styled.div<{
   z-index: 9999;
 `;
 
+const NotificationScrollContainer = styled.div`
+  max-height: 400px; /* Approximately 5 notifications * 80px each */
+  overflow-y: auto;
+  border-radius: 12px;
+`;
+
 const NotificationItem = styled.div`
   padding: 16px;
   border-bottom: 1px solid #f0f0f0;
@@ -222,34 +228,36 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           right={dropdownPosition.right}
           data-notification-dropdown
         >
-          {recentActivity.length > 0 ? (
-            recentActivity.slice(0, 5).map((activity, index) => {
-              const timeAgo = getTimeAgo(new Date(activity.createdAt));
-              return (
-                <NotificationItem
-                  key={index}
-                  onClick={() => handleNotificationItemClick(activity)}
-                >
-                  <NotificationText>
-                    <strong>{activity.user}</strong>{" "}
-                    {activity.type === "comment"
-                      ? "commented on"
-                      : activity.type === "like"
-                      ? "liked"
-                      : "joined"}{" "}
-                    {activity.type === "like" && `"${activity.track}" in `}
-                    <strong>{activity.playlist}</strong>
-                    <br />
-                    <span style={{ color: "#666", fontSize: "12px" }}>
-                      {timeAgo}
-                    </span>
-                  </NotificationText>
-                </NotificationItem>
-              );
-            })
-          ) : (
-            <EmptyNotifications>No recent activity</EmptyNotifications>
-          )}
+          <NotificationScrollContainer>
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => {
+                const timeAgo = getTimeAgo(new Date(activity.createdAt));
+                return (
+                  <NotificationItem
+                    key={index}
+                    onClick={() => handleNotificationItemClick(activity)}
+                  >
+                    <NotificationText>
+                      <strong>{activity.user}</strong>{" "}
+                      {activity.type === "comment"
+                        ? "commented on"
+                        : activity.type === "like"
+                        ? "liked"
+                        : "joined"}{" "}
+                      {activity.type === "like" && `"${activity.track}" in `}
+                      <strong>{activity.playlist}</strong>
+                      <br />
+                      <span style={{ color: "#666", fontSize: "12px" }}>
+                        {timeAgo}
+                      </span>
+                    </NotificationText>
+                  </NotificationItem>
+                );
+              })
+            ) : (
+              <EmptyNotifications>No recent activity</EmptyNotifications>
+            )}
+          </NotificationScrollContainer>
         </NotificationDropdownContainer>
       )}
     </>

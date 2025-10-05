@@ -45,7 +45,7 @@ const ShareButton = styled.button`
   }
 
   &:disabled {
-    background:rgb(181, 181, 181);
+    background: rgb(181, 181, 181);
     cursor: not-allowed;
   }
 `;
@@ -266,8 +266,8 @@ const PlaylistView: React.FC = () => {
           playlistOwner={playlist.owner}
         />
       </Content>
-      <NowPlaying 
-        currentPlaylistId={playlist.id} 
+      <NowPlaying
+        currentPlaylistId={playlist.id}
         playlistTracks={playlist.tracks}
       />
     </PlaylistContainer>
