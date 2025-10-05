@@ -56,6 +56,15 @@ const NotificationScrollContainer = styled.div`
   max-height: 400px; /* Approximately 5 notifications * 80px each */
   overflow-y: auto;
   border-radius: 12px;
+  
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 `;
 
 const NotificationItem = styled.div`

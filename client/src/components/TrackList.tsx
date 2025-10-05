@@ -939,7 +939,7 @@ const TrackList: React.FC<TrackListProps> = ({
   const formatTimestamp = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Handle clicking on a timestamped comment
@@ -956,10 +956,10 @@ const TrackList: React.FC<TrackListProps> = ({
         const trackUri = `spotify:track:${track.id}`;
         const playlistTrackUris = tracks.map((t) => `spotify:track:${t.id}`);
         const trackIndex = tracks.findIndex((t) => t.id === track.id);
-        
+
         // Play the track and then seek to the comment position
         await playTrack(trackUri, playlistTrackUris, trackIndex);
-        
+
         // Wait a moment for the track to start playing, then seek to position
         setTimeout(async () => {
           const positionMs = comment.inSongTimestamp * 1000;
@@ -980,7 +980,7 @@ const TrackList: React.FC<TrackListProps> = ({
     const sortedComments = [...comments].sort((a, b) => {
       const aHasTimestamp = a.inSongTimestamp && a.inSongTimestamp > 0;
       const bHasTimestamp = b.inSongTimestamp && b.inSongTimestamp > 0;
-      
+
       if (aHasTimestamp && bHasTimestamp) {
         // Both have timestamps - sort chronologically by timestamp
         return a.inSongTimestamp - b.inSongTimestamp;
@@ -1214,33 +1214,49 @@ const TrackList: React.FC<TrackListProps> = ({
                   ) : (
                     <div>
                       {/* Show timestamp if comment has one */}
-                      {comment.inSongTimestamp && comment.inSongTimestamp > 0 && (
-                        <div
-                          style={{
-                            color: "#1db954",
-                            fontSize: "12px",
-                            fontWeight: "600",
-                            marginBottom: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                          onClick={() => handleTimestampedCommentClick(comment, track)}
-                          title="Click to jump to this point in the song"
-                        >
-                          ⏰ {formatTimestamp(comment.inSongTimestamp)}
-                        </div>
-                      )}
+                      {comment.inSongTimestamp &&
+                        comment.inSongTimestamp > 0 && (
+                          <div
+                            style={{
+                              color: "#1db954",
+                              fontSize: "12px",
+                              fontWeight: "600",
+                              marginBottom: "4px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                            onClick={() =>
+                              handleTimestampedCommentClick(comment, track)
+                            }
+                            title="Click to jump to this point in the song"
+                          >
+                            ⏰ {formatTimestamp(comment.inSongTimestamp)}
+                          </div>
+                        )}
                       <div
                         style={{
                           color: "rgba(255, 255, 255, 0.7)",
                           fontSize: "14px",
                           lineHeight: "1.4",
-                          cursor: comment.inSongTimestamp && comment.inSongTimestamp > 0 ? "pointer" : "default",
+                          cursor:
+                            comment.inSongTimestamp &&
+                            comment.inSongTimestamp > 0
+                              ? "pointer"
+                              : "default",
                         }}
-                        onClick={comment.inSongTimestamp && comment.inSongTimestamp > 0 ? () => handleTimestampedCommentClick(comment, track) : undefined}
-                        title={comment.inSongTimestamp && comment.inSongTimestamp > 0 ? "Click to jump to this point in the song" : undefined}
+                        onClick={
+                          comment.inSongTimestamp && comment.inSongTimestamp > 0
+                            ? () =>
+                                handleTimestampedCommentClick(comment, track)
+                            : undefined
+                        }
+                        title={
+                          comment.inSongTimestamp && comment.inSongTimestamp > 0
+                            ? "Click to jump to this point in the song"
+                            : undefined
+                        }
                       >
                         {comment.content}
                       </div>
