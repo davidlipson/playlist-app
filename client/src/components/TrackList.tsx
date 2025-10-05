@@ -935,17 +935,75 @@ const TrackList: React.FC<TrackListProps> = ({
     );
   };
 
+  // Helper function to format timestamp
+  const formatTimestamp = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle clicking on a timestamped comment
+  const handleTimestampedCommentClick = async (comment: any, track: Track) => {
+    if (!comment.inSongTimestamp || comment.inSongTimestamp <= 0) return;
+
+    try {
+      // If the comment is for the currently playing track, just seek to the position
+      if (currentTrack && comment.trackId === currentTrack.id) {
+        const positionMs = comment.inSongTimestamp * 1000; // Convert seconds to milliseconds
+        await seekToPosition(positionMs);
+      } else {
+        // If it's a different track, play that track from the comment position
+        const trackUri = `spotify:track:${track.id}`;
+        const playlistTrackUris = tracks.map((t) => `spotify:track:${t.id}`);
+        const trackIndex = tracks.findIndex((t) => t.id === track.id);
+        
+        // Play the track and then seek to the comment position
+        await playTrack(trackUri, playlistTrackUris, trackIndex);
+        
+        // Wait a moment for the track to start playing, then seek to position
+        setTimeout(async () => {
+          const positionMs = comment.inSongTimestamp * 1000;
+          await seekToPosition(positionMs);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error handling timestamped comment click:", error);
+    }
+  };
+
   const renderCommentsSection = (track: Track) => {
     const comments = trackComments[track.id] || [];
     const showForm = showCommentForms[track.id];
     const isSubmitting = submittingComments[track.id];
 
+    // Sort comments: timestamped first (chronologically), then non-timestamped (by editedAt)
+    const sortedComments = [...comments].sort((a, b) => {
+      const aHasTimestamp = a.inSongTimestamp && a.inSongTimestamp > 0;
+      const bHasTimestamp = b.inSongTimestamp && b.inSongTimestamp > 0;
+      
+      if (aHasTimestamp && bHasTimestamp) {
+        // Both have timestamps - sort chronologically by timestamp
+        return a.inSongTimestamp - b.inSongTimestamp;
+      } else if (aHasTimestamp && !bHasTimestamp) {
+        // Only a has timestamp - a comes first
+        return -1;
+      } else if (!aHasTimestamp && bHasTimestamp) {
+        // Only b has timestamp - b comes first
+        return 1;
+      } else {
+        // Neither has timestamp - sort by editedAt (most recent last)
+        const aEditedAt = a.editedAt || a.createdAt;
+        const bEditedAt = b.editedAt || b.createdAt;
+        return new Date(aEditedAt).getTime() - new Date(bEditedAt).getTime();
+      }
+    });
+
     return (
       <div key={`comments-${track.id}`}>
         {/* Comments List - Always show if comments exist */}
-        {comments.length > 0 && (
+        {sortedComments.length > 0 && (
           <div style={{ paddingLeft: "115px", paddingRight: "20px" }}>
-            {comments.map((comment: any) => {
+            {sortedComments.map((comment: any) => {
               const isOwnComment = comment.user.id === user?.id;
               const isEditing = editingComments[comment.id];
               const showMenu = showCommentMenus[comment.id];
@@ -1154,14 +1212,38 @@ const TrackList: React.FC<TrackListProps> = ({
                       </button>
                     </form>
                   ) : (
-                    <div
-                      style={{
-                        color: "rgba(255, 255, 255, 0.7)",
-                        fontSize: "14px",
-                        lineHeight: "1.4",
-                      }}
-                    >
-                      {comment.content}
+                    <div>
+                      {/* Show timestamp if comment has one */}
+                      {comment.inSongTimestamp && comment.inSongTimestamp > 0 && (
+                        <div
+                          style={{
+                            color: "#1db954",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            marginBottom: "4px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                          onClick={() => handleTimestampedCommentClick(comment, track)}
+                          title="Click to jump to this point in the song"
+                        >
+                          ⏰ {formatTimestamp(comment.inSongTimestamp)}
+                        </div>
+                      )}
+                      <div
+                        style={{
+                          color: "rgba(255, 255, 255, 0.7)",
+                          fontSize: "14px",
+                          lineHeight: "1.4",
+                          cursor: comment.inSongTimestamp && comment.inSongTimestamp > 0 ? "pointer" : "default",
+                        }}
+                        onClick={comment.inSongTimestamp && comment.inSongTimestamp > 0 ? () => handleTimestampedCommentClick(comment, track) : undefined}
+                        title={comment.inSongTimestamp && comment.inSongTimestamp > 0 ? "Click to jump to this point in the song" : undefined}
+                      >
+                        {comment.content}
+                      </div>
                     </div>
                   )}
                 </div>
