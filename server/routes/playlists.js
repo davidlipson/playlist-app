@@ -563,9 +563,9 @@ router.post("/predict", authenticateToken, async (req, res) => {
         );
 
         if (hasTrack) {
-          // Simple scoring: prioritize playlists with more tracks and recent activity
-          const score = playlistTracks.total + (playlist.followers?.total || 0);
-          if (score > bestMatchScore) {
+          // Enhanced scoring: prioritize playlists with more engagement
+          const engagementScore = (playlistTracks.total * 2) + (playlist.followers?.total || 0);
+          if (engagementScore > bestMatchScore) {
             bestMatch = {
               id: playlist.id,
               name: playlist.name,
@@ -577,7 +577,7 @@ router.post("/predict", authenticateToken, async (req, res) => {
                 .map((item) => item.track)
                 .filter(Boolean),
             };
-            bestMatchScore = score;
+            bestMatchScore = engagementScore;
           }
         }
       } catch (error) {
@@ -592,7 +592,7 @@ router.post("/predict", authenticateToken, async (req, res) => {
       try {
         const playlistTracks = await spotifyService.getPlaylistTracks(
           req.user.accessToken,
-          playlist.spotifyId,
+          playlist.spotifyPlaylistId,
           100,
           0
         );
@@ -605,7 +605,7 @@ router.post("/predict", authenticateToken, async (req, res) => {
           const score = playlistTracks.total + 10; // Bonus for shared playlists
           if (score > bestMatchScore) {
             bestMatch = {
-              id: playlist.spotifyId,
+              id: playlist.spotifyPlaylistId,
               name: playlist.name,
               owner: {
                 id: playlist.owner.id,
@@ -615,7 +615,7 @@ router.post("/predict", authenticateToken, async (req, res) => {
                 .map((item) => item.track)
                 .filter(Boolean),
             };
-            bestMatchScore = score;
+            bestMatchScore = engagementScore;
           }
         }
       } catch (error) {

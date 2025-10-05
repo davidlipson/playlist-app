@@ -319,6 +319,14 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     }
   }, [currentTrack?.id, lastPredictedTrackId, predictPlaylist]);
 
+  // Predict on initial load if there's already a current track
+  useEffect(() => {
+    if (currentTrack && !lastPredictedTrackId) {
+      setLastPredictedTrackId(currentTrack.id);
+      predictPlaylist(currentTrack.id);
+    }
+  }, [currentTrack, lastPredictedTrackId, predictPlaylist]);
+
   const value = {
     spotifyApi,
     currentTrack,
