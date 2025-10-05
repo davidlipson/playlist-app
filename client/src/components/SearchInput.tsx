@@ -8,7 +8,7 @@ const SearchContainer = styled.div`
 
 const SearchInputField = styled.input`
   width: 100%;
-  padding: 12px 20px 12px 45px;
+  padding: 12px 20px 12px 20px;
   border: none;
   border-radius: 25px;
   background: rgba(255, 255, 255, 0.1);

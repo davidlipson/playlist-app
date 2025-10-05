@@ -65,6 +65,7 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   const [predictedPlaylist, setPredictedPlaylist] =
     useState<PredictedPlaylist | null>(null);
   const [isPredictingPlaylist, setIsPredictingPlaylist] = useState(false);
+  const [lastPredictedTrackId, setLastPredictedTrackId] = useState<string | null>(null);
 
   // Set access token when component mounts
   useEffect(() => {
@@ -268,28 +269,31 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   }, []); // spotifyApi is already memoized with useState
 
   // Predict playlist for current track
-  const predictPlaylist = useCallback(async (trackId: string) => {
-    if (!trackId) return;
+  const predictPlaylist = useCallback(
+    async (trackId: string) => {
+      if (!trackId) return;
 
-    setIsPredictingPlaylist(true);
-    try {
-      const response = await axios.post("/api/playlists/predict", {
-        trackId,
-        userId: user?.id,
-      });
+      setIsPredictingPlaylist(true);
+      try {
+        const response = await axios.post("/api/playlists/predict", {
+          trackId,
+          userId: user?.id,
+        });
 
-      if (response.data && response.data.playlist) {
-        setPredictedPlaylist(response.data.playlist);
-      } else {
+        if (response.data && response.data.playlist) {
+          setPredictedPlaylist(response.data.playlist);
+        } else {
+          setPredictedPlaylist(null);
+        }
+      } catch (error) {
+        console.error("Error predicting playlist:", error);
         setPredictedPlaylist(null);
+      } finally {
+        setIsPredictingPlaylist(false);
       }
-    } catch (error) {
-      console.error("Error predicting playlist:", error);
-      setPredictedPlaylist(null);
-    } finally {
-      setIsPredictingPlaylist(false);
-    }
-  }, [user?.id]);
+    },
+    [user?.id]
+  );
 
   // Check if current track is in predicted playlist
   const isCurrentTrackInPredictedPlaylist = useCallback(() => {
@@ -302,14 +306,16 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   // Predict playlist when track changes
   useEffect(() => {
     if (currentTrack) {
-      // If current track is not in predicted playlist, predict new one
-      if (!isCurrentTrackInPredictedPlaylist()) {
+      // Only predict if this is a new track we haven't predicted for yet
+      if (currentTrack.id !== lastPredictedTrackId) {
+        setLastPredictedTrackId(currentTrack.id);
         predictPlaylist(currentTrack.id);
       }
     } else {
       setPredictedPlaylist(null);
+      setLastPredictedTrackId(null);
     }
-  }, [currentTrack, isCurrentTrackInPredictedPlaylist, predictPlaylist]);
+  }, [currentTrack?.id, lastPredictedTrackId, predictPlaylist]);
 
   const value = {
     spotifyApi,
