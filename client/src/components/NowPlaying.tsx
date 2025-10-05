@@ -163,6 +163,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
   const navigate = useNavigate();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
+  const [lastCommentCount, setLastCommentCount] = useState<number>(0);
 
   // Fetch comments for the current track - only when track changes
   useEffect(() => {
@@ -385,7 +386,14 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
             cursor: "pointer",
             transition: "all 0.2s ease",
           }}
-          onClick={() => navigate(`/playlist/${predictedPlaylist.id}`)}
+          onClick={() => {
+            // Handle navigation similar to Dashboard component
+            console.log("Predicted playlist:", predictedPlaylist);
+            if (predictedPlaylist.id) {
+              console.log("Navigating to playlist:", predictedPlaylist.id);
+              navigate(`/playlist/${predictedPlaylist.id}`);
+            }
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "rgba(29, 185, 84, 0.2)";
           }}

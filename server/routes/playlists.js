@@ -564,7 +564,8 @@ router.post("/predict", authenticateToken, async (req, res) => {
 
         if (hasTrack) {
           // Enhanced scoring: prioritize playlists with more engagement
-          const engagementScore = (playlistTracks.total * 2) + (playlist.followers?.total || 0);
+          const engagementScore =
+            playlistTracks.total * 2 + (playlist.followers?.total || 0);
           if (engagementScore > bestMatchScore) {
             bestMatch = {
               id: playlist.id,
