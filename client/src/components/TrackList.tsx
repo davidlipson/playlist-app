@@ -862,6 +862,22 @@ const TrackList: React.FC<TrackListProps> = ({
   // Debug current track and playing state
   useEffect(() => {}, [currentTrack, isPlaying, position]);
 
+  // Clear captured timestamps when current track changes
+  useEffect(() => {
+    if (currentTrack) {
+      // Clear timestamps for all tracks except the current one
+      setCapturedTimestamps((prev) => {
+        const newState = { ...prev };
+        Object.keys(newState).forEach((trackId) => {
+          if (trackId !== currentTrack.id) {
+            delete newState[trackId];
+          }
+        });
+        return newState;
+      });
+    }
+  }, [currentTrack]);
+
   // No auto-open comments - users must manually open comment sections
 
   const renderTrackItem = (track: Track, index: number) => {
@@ -949,10 +965,13 @@ const TrackList: React.FC<TrackListProps> = ({
   };
 
   const getCommentPlaceholder = (trackId: string) => {
-    const timestamp = capturedTimestamps[trackId];
-    if (timestamp && timestamp > 0) {
-      const formattedTime = formatTimestamp(timestamp);
-      return `⏰ Add a comment at ${formattedTime} in the song`;
+    // Only show timestamp for the currently playing track
+    if (currentTrack && currentTrack.id === trackId) {
+      const timestamp = capturedTimestamps[trackId];
+      if (timestamp && timestamp > 0) {
+        const formattedTime = formatTimestamp(timestamp);
+        return `⏰ Add a comment at ${formattedTime} in the song`;
+      }
     }
     return "Add a comment...";
   };
