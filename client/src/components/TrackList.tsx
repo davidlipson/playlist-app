@@ -417,7 +417,7 @@ const TrackList: React.FC<TrackListProps> = ({
   collaborators,
   playlistOwner,
 }) => {
-  const { playTrack, currentTrack, isPlaying, position, getCurrentState } =
+  const { playTrack, currentTrack, isPlaying, position, getCurrentState, seekToPosition } =
     useSpotify();
   const { user } = useAuth();
   const [trackLikes, setTrackLikes] = useState<{ [trackId: string]: Like[] }>(
