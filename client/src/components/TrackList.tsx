@@ -948,6 +948,15 @@ const TrackList: React.FC<TrackListProps> = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const getCommentPlaceholder = (trackId: string) => {
+    const timestamp = capturedTimestamps[trackId];
+    if (timestamp && timestamp > 0) {
+      const formattedTime = formatTimestamp(timestamp);
+      return `⏰ Add a comment at ${formattedTime} in the song`;
+    }
+    return "Add a comment...";
+  };
+
   // Handle clicking on a timestamped comment
   const handleTimestampedCommentClick = async (comment: any, track: Track) => {
     if (!comment.inSongTimestamp || comment.inSongTimestamp <= 0) return;
@@ -1261,26 +1270,6 @@ const TrackList: React.FC<TrackListProps> = ({
         {/* Comment Form */}
         {showForm && (
           <div style={{ paddingLeft: "115px", paddingRight: "20px" }}>
-            {capturedTimestamps[track.id] &&
-              capturedTimestamps[track.id] > 0 && (
-                <div
-                  style={{
-                    color: "rgba(255, 255, 255, 0.8)",
-                    fontSize: "12px",
-                    marginBottom: "5px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                  }}
-                >
-                  ⏰ Commenting on{" "}
-                  {Math.floor(capturedTimestamps[track.id] / 60)}:
-                  {(capturedTimestamps[track.id] % 60)
-                    .toString()
-                    .padStart(2, "0")}{" "}
-                  in the song
-                </div>
-              )}
             <form
               onSubmit={(e) => handleCommentSubmit(track.id, e)}
               style={{
@@ -1307,7 +1296,7 @@ const TrackList: React.FC<TrackListProps> = ({
                   }
                 }}
                 required
-                placeholder="Add a comment..."
+                placeholder={getCommentPlaceholder(track.id)}
                 className="comment-input"
                 data-track-id={track.id}
                 style={{
