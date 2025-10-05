@@ -581,21 +581,17 @@ router.post("/predict", authenticateToken, async (req, res) => {
             ],
           });
 
-          // Enhanced scoring: prioritize playlists with more engagement
+          // Engagement scoring: only based on likes and comments
           const commentCount = dbPlaylist?.comments?.length || 0;
           const likeCount = dbPlaylist?.likes?.length || 0;
-          const engagementScore =
-            playlistTracks.total * 2 + 
-            (playlist.followers?.total || 0) + 
-            commentCount * 5 + 
-            likeCount * 3;
-          
+          const engagementScore = commentCount + likeCount;
+
           console.log(`Playlist ${playlist.name} score:`, {
             trackCount: playlistTracks.total,
             followers: playlist.followers?.total || 0,
             comments: commentCount,
             likes: likeCount,
-            totalScore: engagementScore
+            totalScore: engagementScore,
           });
 
           if (engagementScore > bestMatchScore) {
@@ -638,17 +634,13 @@ router.post("/predict", authenticateToken, async (req, res) => {
           // Get engagement data for shared playlist
           const commentCount = playlist.comments?.length || 0;
           const likeCount = playlist.likes?.length || 0;
-          const engagementScore =
-            playlistTracks.total * 2 + 
-            10 + // Bonus for shared playlists
-            commentCount * 5 + 
-            likeCount * 3;
-          
+          const engagementScore = commentCount + likeCount + 10; // Bonus for shared playlists
+
           console.log(`Shared playlist ${playlist.name} score:`, {
             trackCount: playlistTracks.total,
             comments: commentCount,
             likes: likeCount,
-            totalScore: engagementScore
+            totalScore: engagementScore,
           });
 
           if (engagementScore > bestMatchScore) {
