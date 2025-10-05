@@ -31,7 +31,8 @@ interface SpotifyContextType {
     trackUri: string,
     playlistTracks?: string[],
     startIndex?: number,
-    positionMs?: number
+    positionMs?: number,
+    playlistInfo?: { id: string; name: string; owner: { id: string; displayName: string } }
   ) => Promise<void>;
   pauseTrack: () => Promise<void>;
   resumeTrack: () => Promise<void>;
@@ -129,9 +130,25 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     trackUri: string,
     playlistTracks?: string[],
     startIndex?: number,
-    positionMs?: number
+    positionMs?: number,
+    playlistInfo?: { id: string; name: string; owner: { id: string; displayName: string } }
   ) => {
     try {
+      // If playlist info is provided, set it as the predicted playlist immediately
+      if (playlistInfo) {
+        setPredictedPlaylist({
+          id: playlistInfo.id,
+          name: playlistInfo.name,
+          owner: {
+            id: playlistInfo.owner.id,
+            displayName: playlistInfo.owner.displayName,
+          },
+          tracks: playlistTracks?.map(uri => ({ uri })) || [],
+        });
+        setIsPredictingPlaylist(false);
+        setLastPredictedTrackId(trackUri.split(':')[2]); // Extract track ID from URI
+      }
+
       if (playlistTracks && playlistTracks.length > 0) {
         // Play the entire playlist starting from the selected track
         const startIndexToUse =

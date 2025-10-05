@@ -524,7 +524,17 @@ const TrackList: React.FC<TrackListProps> = ({
       // Find the index of the clicked track
       const trackIndex = tracks.findIndex((t) => t.id === track.id);
 
-      await playTrack(trackUri, playlistTrackUris, trackIndex);
+      // Pass playlist info to set predicted playlist immediately
+      const playlistInfo = playlistOwner ? {
+        id: playlistId,
+        name: `Playlist ${playlistId}`, // We don't have the playlist name here, but we have the ID
+        owner: {
+          id: playlistOwner.id,
+          displayName: playlistOwner.displayName,
+        },
+      } : undefined;
+
+      await playTrack(trackUri, playlistTrackUris, trackIndex, undefined, playlistInfo);
     } catch (error) {
       console.error("Failed to play track:", error);
       alert("Failed to play track. Please try again.");
@@ -991,7 +1001,15 @@ const TrackList: React.FC<TrackListProps> = ({
         const positionMs = comment.inSongTimestamp * 1000; // Convert seconds to milliseconds
 
         // Play the track starting from the comment position
-        await playTrack(trackUri, playlistTrackUris, trackIndex, positionMs);
+        const playlistInfo = playlistOwner ? {
+          id: playlistId,
+          name: `Playlist ${playlistId}`, // We don't have the playlist name here, but we have the ID
+          owner: {
+            id: playlistOwner.id,
+            displayName: playlistOwner.displayName,
+          },
+        } : undefined;
+        await playTrack(trackUri, playlistTrackUris, trackIndex, positionMs, playlistInfo);
       }
     } catch (error) {
       console.error("Error handling timestamped comment click:", error);

@@ -269,6 +269,14 @@ const PlaylistView: React.FC = () => {
       <NowPlaying
         currentPlaylistId={playlist.id}
         playlistTracks={playlist.tracks}
+        playlistInfo={{
+          id: playlist.id,
+          name: playlist.name,
+          owner: {
+            id: playlist.owner.id,
+            displayName: playlist.owner.displayName,
+          },
+        }}
       />
     </PlaylistContainer>
   );
