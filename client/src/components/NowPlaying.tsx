@@ -152,13 +152,20 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
   currentPlaylistId,
   playlistTracks = [],
 }) => {
-  const { currentTrack, position, playTrack, seekToPosition, predictedPlaylist, isPredictingPlaylist } = useSpotify();
+  const {
+    currentTrack,
+    position,
+    playTrack,
+    seekToPosition,
+    predictedPlaylist,
+    isPredictingPlaylist,
+  } = useSpotify();
   const navigate = useNavigate();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
   const [lastCommentCount, setLastCommentCount] = useState<number>(0);
 
-  // Fetch comments for the current track
+  // Fetch comments for the current track - only when track changes
   useEffect(() => {
     const fetchCurrentTrackComments = async () => {
       if (!currentTrack) {
@@ -198,7 +205,21 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
     };
 
     fetchCurrentTrackComments();
-  }, [currentTrack, trackComments, currentPlaylistId]);
+  }, [currentTrack?.id]); // Only depend on track ID, not the entire track object
+
+  // Update comments when trackComments prop changes (for playlist pages)
+  useEffect(() => {
+    if (currentTrack && trackComments[currentTrack.id]) {
+      let filteredComments = trackComments[currentTrack.id];
+      if (currentPlaylistId) {
+        filteredComments = trackComments[currentTrack.id].filter(
+          (comment: any) =>
+            comment.playlist && comment.playlist.id === currentPlaylistId
+        );
+      }
+      setCurrentTrackComments(filteredComments);
+    }
+  }, [trackComments, currentTrack?.id, currentPlaylistId]);
 
   // Listen for new comments added by the current user
   useEffect(() => {
@@ -373,13 +394,27 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
             e.currentTarget.style.background = "rgba(29, 185, 84, 0.1)";
           }}
         >
-          <div style={{ fontSize: "12px", color: "#1db954", fontWeight: "600" }}>
+          <div
+            style={{ fontSize: "12px", color: "#1db954", fontWeight: "600" }}
+          >
             {isPredictingPlaylist ? "Detecting playlist..." : "Listening to"}
           </div>
-          <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.9)", marginTop: "2px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              color: "rgba(255, 255, 255, 0.9)",
+              marginTop: "2px",
+            }}
+          >
             {predictedPlaylist.name}
           </div>
-          <div style={{ fontSize: "10px", color: "rgba(255, 255, 255, 0.6)", marginTop: "1px" }}>
+          <div
+            style={{
+              fontSize: "10px",
+              color: "rgba(255, 255, 255, 0.6)",
+              marginTop: "1px",
+            }}
+          >
             by {predictedPlaylist.owner.displayName}
           </div>
         </div>
