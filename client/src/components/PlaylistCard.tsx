@@ -12,9 +12,11 @@ const Card = styled.div<{ isShared?: boolean; isCurrentPlaylist?: boolean }>`
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: ${props => props.isCurrentPlaylist ? '5px' : '0'};
-  background: ${props => props.isCurrentPlaylist ? 'rgba(29, 185, 84, 0.1)' : 'transparent'};
-  border: ${props => props.isCurrentPlaylist ? '2px solid #1db954' : 'none'};
+  padding: ${(props) => (props.isCurrentPlaylist ? "5px" : "0")};
+  background: ${(props) =>
+    props.isCurrentPlaylist ? "rgba(29, 185, 84, 0.1)" : "transparent"};
+  border: ${(props) =>
+    props.isCurrentPlaylist ? "2px solid #1db954" : "none"};
 
   &:hover {
     transform: translateY(-5px);
@@ -123,7 +125,11 @@ const PlaylistCard: React.FC<PlaylistCardProps> = ({
   isCurrentPlaylist,
 }) => {
   return (
-    <Card onClick={onClick} isShared={isShared} isCurrentPlaylist={isCurrentPlaylist}>
+    <Card
+      onClick={onClick}
+      isShared={isShared}
+      isCurrentPlaylist={isCurrentPlaylist}
+    >
       <ImageContainer>
         {playlist.imageUrl ? (
           <PlaylistImage src={playlist.imageUrl} alt={playlist.name} />

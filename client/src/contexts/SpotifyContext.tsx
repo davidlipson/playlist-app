@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import SpotifyWebApi from "spotify-web-api-js";
 import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 interface PredictedPlaylist {
   id: string;
@@ -55,6 +56,7 @@ interface SpotifyProviderProps {
 export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   children,
 }) => {
+  const { user } = useAuth();
   const [spotifyApi] = useState(() => new SpotifyWebApi());
   const [currentTrack, setCurrentTrack] =
     useState<SpotifyApi.TrackObjectFull | null>(null);
@@ -273,7 +275,7 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     try {
       const response = await axios.post("/api/playlists/predict", {
         trackId,
-        userId: localStorage.getItem("userId"),
+        userId: user?.id,
       });
 
       if (response.data && response.data.playlist) {
@@ -287,7 +289,7 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     } finally {
       setIsPredictingPlaylist(false);
     }
-  }, []);
+  }, [user?.id]);
 
   // Check if current track is in predicted playlist
   const isCurrentTrackInPredictedPlaylist = useCallback(() => {

@@ -323,7 +323,11 @@ const Dashboard: React.FC = () => {
               playlist={playlist}
               onClick={() => handlePlaylistClick(playlist)}
               isShared={playlist.isShared}
-              isCurrentPlaylist={predictedPlaylist && (playlist.spotifyId === predictedPlaylist.id || playlist.id === predictedPlaylist.id)}
+              isCurrentPlaylist={
+                !!predictedPlaylist &&
+                (playlist.spotifyId === predictedPlaylist.id ||
+                  playlist.id === predictedPlaylist.id)
+              }
             />
           ))}
         </PlaylistsGrid>
