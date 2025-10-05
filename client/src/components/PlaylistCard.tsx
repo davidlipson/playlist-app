@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import UserList from "./UserList";
 
-const Card = styled.div<{ isShared?: boolean }>`
+const Card = styled.div<{ isShared?: boolean; isCurrentPlaylist?: boolean }>`
   position: relative;
   backdrop-filter: blur(10px);
   border-radius: 15px;
@@ -12,6 +12,9 @@ const Card = styled.div<{ isShared?: boolean }>`
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: ${props => props.isCurrentPlaylist ? '5px' : '0'};
+  background: ${props => props.isCurrentPlaylist ? 'rgba(29, 185, 84, 0.1)' : 'transparent'};
+  border: ${props => props.isCurrentPlaylist ? '2px solid #1db954' : 'none'};
 
   &:hover {
     transform: translateY(-5px);
@@ -110,15 +113,17 @@ interface PlaylistCardProps {
   playlist: Playlist;
   onClick: () => void;
   isShared?: boolean;
+  isCurrentPlaylist?: boolean;
 }
 
 const PlaylistCard: React.FC<PlaylistCardProps> = ({
   playlist,
   onClick,
   isShared,
+  isCurrentPlaylist,
 }) => {
   return (
-    <Card onClick={onClick} isShared={isShared}>
+    <Card onClick={onClick} isShared={isShared} isCurrentPlaylist={isCurrentPlaylist}>
       <ImageContainer>
         {playlist.imageUrl ? (
           <PlaylistImage src={playlist.imageUrl} alt={playlist.name} />

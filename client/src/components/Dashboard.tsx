@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
+import { useSpotify } from "../contexts/SpotifyContext";
 import PlaylistCard from "./PlaylistCard";
 import LoadingSpinner from "./LoadingSpinner";
 import SearchInput from "./SearchInput";
@@ -132,6 +133,7 @@ const Dashboard: React.FC = () => {
   const [showPersonal, setShowPersonal] = useState(true);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { predictedPlaylist } = useSpotify();
 
   const fetchMyPlaylists = useCallback(async () => {
     try {
@@ -321,6 +323,7 @@ const Dashboard: React.FC = () => {
               playlist={playlist}
               onClick={() => handlePlaylistClick(playlist)}
               isShared={playlist.isShared}
+              isCurrentPlaylist={predictedPlaylist && (playlist.spotifyId === predictedPlaylist.id || playlist.id === predictedPlaylist.id)}
             />
           ))}
         </PlaylistsGrid>

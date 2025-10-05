@@ -163,7 +163,6 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
   const navigate = useNavigate();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
-  const [lastCommentCount, setLastCommentCount] = useState<number>(0);
 
   // Fetch comments for the current track - only when track changes
   useEffect(() => {
