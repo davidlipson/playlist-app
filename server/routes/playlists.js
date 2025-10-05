@@ -572,9 +572,32 @@ router.post("/predict", authenticateToken, async (req, res) => {
         );
 
         if (hasTrack) {
+          // Get engagement data from database for this playlist
+          const dbPlaylist = await Playlist.findOne({
+            where: { spotifyPlaylistId: playlist.id },
+            include: [
+              { model: Comment, as: "comments", attributes: ["id"] },
+              { model: Like, as: "likes", attributes: ["id"] },
+            ],
+          });
+
           // Enhanced scoring: prioritize playlists with more engagement
+          const commentCount = dbPlaylist?.comments?.length || 0;
+          const likeCount = dbPlaylist?.likes?.length || 0;
           const engagementScore =
-            playlistTracks.total * 2 + (playlist.followers?.total || 0);
+            playlistTracks.total * 2 + 
+            (playlist.followers?.total || 0) + 
+            commentCount * 5 + 
+            likeCount * 3;
+          
+          console.log(`Playlist ${playlist.name} score:`, {
+            trackCount: playlistTracks.total,
+            followers: playlist.followers?.total || 0,
+            comments: commentCount,
+            likes: likeCount,
+            totalScore: engagementScore
+          });
+
           if (engagementScore > bestMatchScore) {
             bestMatch = {
               id: playlist.id,
@@ -612,8 +635,23 @@ router.post("/predict", authenticateToken, async (req, res) => {
         );
 
         if (hasTrack) {
-          const score = playlistTracks.total + 10; // Bonus for shared playlists
-          if (score > bestMatchScore) {
+          // Get engagement data for shared playlist
+          const commentCount = playlist.comments?.length || 0;
+          const likeCount = playlist.likes?.length || 0;
+          const engagementScore =
+            playlistTracks.total * 2 + 
+            10 + // Bonus for shared playlists
+            commentCount * 5 + 
+            likeCount * 3;
+          
+          console.log(`Shared playlist ${playlist.name} score:`, {
+            trackCount: playlistTracks.total,
+            comments: commentCount,
+            likes: likeCount,
+            totalScore: engagementScore
+          });
+
+          if (engagementScore > bestMatchScore) {
             bestMatch = {
               id: playlist.spotifyPlaylistId,
               name: playlist.name,
