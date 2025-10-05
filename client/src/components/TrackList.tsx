@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { useSpotify } from "../contexts/SpotifyContext";

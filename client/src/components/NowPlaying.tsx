@@ -143,13 +143,15 @@ const CommentTooltip = styled.div<{ isVisible: boolean }>`
 interface NowPlayingProps {
   trackComments?: { [trackId: string]: any[] };
   currentPlaylistId?: string;
+  playlistTracks?: any[];
 }
 
 const NowPlaying: React.FC<NowPlayingProps> = ({
   trackComments = {},
   currentPlaylistId,
+  playlistTracks = [],
 }) => {
-  const { currentTrack, position } = useSpotify();
+  const { currentTrack, position, playTrack, seekToPosition } = useSpotify();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
   const [lastCommentCount, setLastCommentCount] = useState<number>(0);
@@ -243,6 +245,38 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
     return timestampedComments;
   };
 
+  // Handle clicking on a comment circle
+  const handleCommentClick = async (comment: any) => {
+    if (!currentTrack) return;
+
+    try {
+      // If the comment is for the currently playing track, just seek to the position
+      if (comment.trackId === currentTrack.id) {
+        const positionMs = comment.inSongTimestamp * 1000; // Convert seconds to milliseconds
+        await seekToPosition(positionMs);
+      } else {
+        // If it's a different track, play that track from the comment position
+        const targetTrack = playlistTracks.find((track: any) => track.id === comment.trackId);
+        if (targetTrack && playlistTracks.length > 0) {
+          const trackUri = `spotify:track:${comment.trackId}`;
+          const playlistTrackUris = playlistTracks.map((track: any) => `spotify:track:${track.id}`);
+          const trackIndex = playlistTracks.findIndex((track: any) => track.id === comment.trackId);
+          
+          // Play the track and then seek to the comment position
+          await playTrack(trackUri, playlistTrackUris, trackIndex);
+          
+          // Wait a moment for the track to start playing, then seek to position
+          setTimeout(async () => {
+            const positionMs = comment.inSongTimestamp * 1000;
+            await seekToPosition(positionMs);
+          }, 1000);
+        }
+      }
+    } catch (error) {
+      console.error("Error handling comment click:", error);
+    }
+  };
+
   return (
     <NowPlayingContainer>
       <ProgressContainer>
@@ -272,6 +306,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
                   position={positionPercent}
                   onMouseEnter={() => setHoveredCommentId(comment.id)}
                   onMouseLeave={() => setHoveredCommentId(null)}
+                  onClick={() => handleCommentClick(comment)}
                 >
                   <CommentTooltip isVisible={hoveredCommentId === comment.id}>
                     <div style={{ fontWeight: "600", marginBottom: "4px" }}>
