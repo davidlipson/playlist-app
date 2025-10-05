@@ -145,7 +145,11 @@ interface NowPlayingProps {
   trackComments?: { [trackId: string]: any[] };
   currentPlaylistId?: string;
   playlistTracks?: any[];
-  playlistInfo?: { id: string; name: string; owner: { id: string; displayName: string } };
+  playlistInfo?: {
+    id: string;
+    name: string;
+    owner: { id: string; displayName: string };
+  };
 }
 
 const NowPlaying: React.FC<NowPlayingProps> = ({
@@ -301,7 +305,13 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
           const positionMs = comment.inSongTimestamp * 1000; // Convert seconds to milliseconds
 
           // Play the track starting from the comment position
-          await playTrack(trackUri, playlistTrackUris, trackIndex, positionMs, playlistInfo);
+          await playTrack(
+            trackUri,
+            playlistTrackUris,
+            trackIndex,
+            positionMs,
+            playlistInfo
+          );
         }
       }
     } catch (error) {

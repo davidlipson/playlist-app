@@ -32,7 +32,11 @@ interface SpotifyContextType {
     playlistTracks?: string[],
     startIndex?: number,
     positionMs?: number,
-    playlistInfo?: { id: string; name: string; owner: { id: string; displayName: string } }
+    playlistInfo?: {
+      id: string;
+      name: string;
+      owner: { id: string; displayName: string };
+    }
   ) => Promise<void>;
   pauseTrack: () => Promise<void>;
   resumeTrack: () => Promise<void>;
@@ -131,22 +135,52 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     playlistTracks?: string[],
     startIndex?: number,
     positionMs?: number,
-    playlistInfo?: { id: string; name: string; owner: { id: string; displayName: string } }
+    playlistInfo?: {
+      id: string;
+      name: string;
+      owner: { id: string; displayName: string };
+    }
   ) => {
     try {
-      // If playlist info is provided, set it as the predicted playlist immediately
+      // If playlist info is provided, fetch the full tracklist and set it as the predicted playlist
       if (playlistInfo) {
-        setPredictedPlaylist({
-          id: playlistInfo.id,
-          name: playlistInfo.name,
-          owner: {
-            id: playlistInfo.owner.id,
-            displayName: playlistInfo.owner.displayName,
-          },
-          tracks: playlistTracks?.map(uri => ({ uri })) || [],
-        });
-        setIsPredictingPlaylist(false);
-        setLastPredictedTrackId(trackUri.split(':')[2]); // Extract track ID from URI
+        try {
+          // Fetch the full playlist tracks from Spotify
+          const playlistTracksResponse = await spotifyApi.getPlaylistTracks(playlistInfo.id, {
+            limit: 100,
+            offset: 0,
+          });
+          
+          const fullTracks = playlistTracksResponse.items
+            .map((item) => item.track)
+            .filter(Boolean);
+
+          setPredictedPlaylist({
+            id: playlistInfo.id,
+            name: playlistInfo.name,
+            owner: {
+              id: playlistInfo.owner.id,
+              displayName: playlistInfo.owner.displayName,
+            },
+            tracks: fullTracks,
+          });
+          setIsPredictingPlaylist(false);
+          setLastPredictedTrackId(trackUri.split(":")[2]); // Extract track ID from URI
+        } catch (error) {
+          console.error("Error fetching playlist tracks:", error);
+          // Fallback to basic info without tracks
+          setPredictedPlaylist({
+            id: playlistInfo.id,
+            name: playlistInfo.name,
+            owner: {
+              id: playlistInfo.owner.id,
+              displayName: playlistInfo.owner.displayName,
+            },
+            tracks: playlistTracks?.map((uri) => ({ uri })) || [],
+          });
+          setIsPredictingPlaylist(false);
+          setLastPredictedTrackId(trackUri.split(":")[2]);
+        }
       }
 
       if (playlistTracks && playlistTracks.length > 0) {
