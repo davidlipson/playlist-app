@@ -378,52 +378,25 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
       {predictedPlaylist && !isPredictingPlaylist && (
         <div
           style={{
-            marginTop: "8px",
-            padding: "8px 12px",
-            background: "rgba(29, 185, 84, 0.1)",
-            border: "1px solid rgba(29, 185, 84, 0.3)",
-            borderRadius: "8px",
+            fontSize: "12px",
+            color: "#1db954",
+            fontWeight: "600",
             cursor: "pointer",
-            transition: "all 0.2s ease",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "100%",
+            marginTop: "4px",
           }}
           onClick={() => {
-            // Handle navigation similar to Dashboard component
             console.log("Predicted playlist:", predictedPlaylist);
             if (predictedPlaylist.id) {
               console.log("Navigating to playlist:", predictedPlaylist.id);
               navigate(`/playlist/${predictedPlaylist.id}`);
             }
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(29, 185, 84, 0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(29, 185, 84, 0.1)";
-          }}
         >
-          <div
-            style={{ fontSize: "12px", color: "#1db954", fontWeight: "600" }}
-          >
-            {isPredictingPlaylist ? "Detecting playlist..." : "Listening to"}
-          </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: "rgba(255, 255, 255, 0.9)",
-              marginTop: "2px",
-            }}
-          >
-            {predictedPlaylist.name}
-          </div>
-          <div
-            style={{
-              fontSize: "10px",
-              color: "rgba(255, 255, 255, 0.6)",
-              marginTop: "1px",
-            }}
-          >
-            by {predictedPlaylist.owner.displayName}
-          </div>
+          Listening to {predictedPlaylist.name}
         </div>
       )}
     </NowPlayingContainer>
