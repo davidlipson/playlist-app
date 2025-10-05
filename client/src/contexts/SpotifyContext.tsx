@@ -271,7 +271,7 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
 
     setIsPredictingPlaylist(true);
     try {
-      const response = await axios.post("/api/playlist/predict", {
+      const response = await axios.post("/api/playlists/predict", {
         trackId,
         userId: localStorage.getItem("userId"),
       });
