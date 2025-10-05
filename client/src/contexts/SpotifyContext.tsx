@@ -65,7 +65,9 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   const [predictedPlaylist, setPredictedPlaylist] =
     useState<PredictedPlaylist | null>(null);
   const [isPredictingPlaylist, setIsPredictingPlaylist] = useState(false);
-  const [lastPredictedTrackId, setLastPredictedTrackId] = useState<string | null>(null);
+  const [lastPredictedTrackId, setLastPredictedTrackId] = useState<
+    string | null
+  >(null);
 
   // Set access token when component mounts
   useEffect(() => {

@@ -521,7 +521,7 @@ router.get("/:playlistId/share-link", authenticateToken, async (req, res) => {
 router.post("/predict", authenticateToken, async (req, res) => {
   try {
     const { trackId, userId } = req.body;
-    
+
     if (!trackId) {
       return res.status(400).json({ error: "Track ID is required" });
     }
@@ -535,10 +535,14 @@ router.post("/predict", authenticateToken, async (req, res) => {
 
     // Get shared playlists where user is a collaborator
     const sharedPlaylists = await SharedPlaylist.findAll({
-      where: { collaboratorId: req.user.id },
+      where: { sharedWithUserId: req.user.id },
       include: [
-        { model: Playlist, as: "playlist", include: [{ model: User, as: "owner" }] }
-      ]
+        {
+          model: Playlist,
+          as: "playlist",
+          include: [{ model: User, as: "owner" }],
+        },
+      ],
     });
 
     let bestMatch = null;
@@ -553,11 +557,11 @@ router.post("/predict", authenticateToken, async (req, res) => {
           100,
           0
         );
-        
+
         const hasTrack = playlistTracks.items.some(
           (item) => item.track && item.track.id === trackId
         );
-        
+
         if (hasTrack) {
           // Simple scoring: prioritize playlists with more tracks and recent activity
           const score = playlistTracks.total + (playlist.followers?.total || 0);
@@ -567,9 +571,11 @@ router.post("/predict", authenticateToken, async (req, res) => {
               name: playlist.name,
               owner: {
                 id: playlist.owner.id,
-                displayName: playlist.owner.display_name
+                displayName: playlist.owner.display_name,
               },
-              tracks: playlistTracks.items.map(item => item.track).filter(Boolean)
+              tracks: playlistTracks.items
+                .map((item) => item.track)
+                .filter(Boolean),
             };
             bestMatchScore = score;
           }
@@ -590,11 +596,11 @@ router.post("/predict", authenticateToken, async (req, res) => {
           100,
           0
         );
-        
+
         const hasTrack = playlistTracks.items.some(
           (item) => item.track && item.track.id === trackId
         );
-        
+
         if (hasTrack) {
           const score = playlistTracks.total + 10; // Bonus for shared playlists
           if (score > bestMatchScore) {
@@ -603,22 +609,27 @@ router.post("/predict", authenticateToken, async (req, res) => {
               name: playlist.name,
               owner: {
                 id: playlist.owner.id,
-                displayName: playlist.owner.displayName
+                displayName: playlist.owner.displayName,
               },
-              tracks: playlistTracks.items.map(item => item.track).filter(Boolean)
+              tracks: playlistTracks.items
+                .map((item) => item.track)
+                .filter(Boolean),
             };
             bestMatchScore = score;
           }
         }
       } catch (error) {
-        console.error(`Error checking shared playlist ${playlist.spotifyId}:`, error);
+        console.error(
+          `Error checking shared playlist ${playlist.spotifyId}:`,
+          error
+        );
         continue;
       }
     }
 
     res.json({
       playlist: bestMatch,
-      confidence: bestMatch ? Math.min(bestMatchScore / 100, 1) : 0
+      confidence: bestMatch ? Math.min(bestMatchScore / 100, 1) : 0,
     });
   } catch (error) {
     console.error("Error predicting playlist:", error);
