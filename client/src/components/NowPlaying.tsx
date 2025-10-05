@@ -275,15 +275,10 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
           const trackIndex = playlistTracks.findIndex(
             (track: any) => track.id === comment.trackId
           );
+          const positionMs = comment.inSongTimestamp * 1000; // Convert seconds to milliseconds
 
-          // Play the track and then seek to the comment position
-          await playTrack(trackUri, playlistTrackUris, trackIndex);
-
-          // Wait a moment for the track to start playing, then seek to position
-          setTimeout(async () => {
-            const positionMs = comment.inSongTimestamp * 1000;
-            await seekToPosition(positionMs);
-          }, 1000);
+          // Play the track starting from the comment position
+          await playTrack(trackUri, playlistTrackUris, trackIndex, positionMs);
         }
       }
     } catch (error) {

@@ -962,15 +962,10 @@ const TrackList: React.FC<TrackListProps> = ({
         const trackUri = `spotify:track:${track.id}`;
         const playlistTrackUris = tracks.map((t) => `spotify:track:${t.id}`);
         const trackIndex = tracks.findIndex((t) => t.id === track.id);
+        const positionMs = comment.inSongTimestamp * 1000; // Convert seconds to milliseconds
 
-        // Play the track and then seek to the comment position
-        await playTrack(trackUri, playlistTrackUris, trackIndex);
-
-        // Wait a moment for the track to start playing, then seek to position
-        setTimeout(async () => {
-          const positionMs = comment.inSongTimestamp * 1000;
-          await seekToPosition(positionMs);
-        }, 1000);
+        // Play the track starting from the comment position
+        await playTrack(trackUri, playlistTrackUris, trackIndex, positionMs);
       }
     } catch (error) {
       console.error("Error handling timestamped comment click:", error);
@@ -1224,15 +1219,13 @@ const TrackList: React.FC<TrackListProps> = ({
                         fontSize: "14px",
                         lineHeight: "1.4",
                         cursor:
-                          comment.inSongTimestamp &&
-                          comment.inSongTimestamp > 0
+                          comment.inSongTimestamp && comment.inSongTimestamp > 0
                             ? "pointer"
                             : "default",
                       }}
                       onClick={
                         comment.inSongTimestamp && comment.inSongTimestamp > 0
-                          ? () =>
-                              handleTimestampedCommentClick(comment, track)
+                          ? () => handleTimestampedCommentClick(comment, track)
                           : undefined
                       }
                       title={

@@ -17,7 +17,8 @@ interface SpotifyContextType {
   playTrack: (
     trackUri: string,
     playlistTracks?: string[],
-    startIndex?: number
+    startIndex?: number,
+    positionMs?: number
   ) => Promise<void>;
   pauseTrack: () => Promise<void>;
   resumeTrack: () => Promise<void>;
@@ -107,7 +108,8 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
   const playTrack = async (
     trackUri: string,
     playlistTracks?: string[],
-    startIndex?: number
+    startIndex?: number,
+    positionMs?: number
   ) => {
     try {
       if (playlistTracks && playlistTracks.length > 0) {
@@ -120,11 +122,13 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
         // Clear existing queue and play new tracks (spotifyApi.play with uris replaces the queue)
         await spotifyApi.play({
           uris: tracksToPlay,
+          position_ms: positionMs || 0,
         });
       } else {
         // Fallback to single track play (also clears existing queue)
         await spotifyApi.play({
           uris: [trackUri],
+          position_ms: positionMs || 0,
         });
       }
     } catch (error) {
