@@ -375,7 +375,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
       </NowPlayingInfo>
 
       {/* Predicted Playlist Display */}
-      {predictedPlaylist && (
+      {predictedPlaylist && !isPredictingPlaylist && (
         <div
           style={{
             marginTop: "8px",
