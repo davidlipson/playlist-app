@@ -146,11 +146,14 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
       if (playlistInfo) {
         try {
           // Fetch the full playlist tracks from Spotify
-          const playlistTracksResponse = await spotifyApi.getPlaylistTracks(playlistInfo.id, {
-            limit: 100,
-            offset: 0,
-          });
-          
+          const playlistTracksResponse = await spotifyApi.getPlaylistTracks(
+            playlistInfo.id,
+            {
+              limit: 100,
+              offset: 0,
+            }
+          );
+
           const fullTracks = playlistTracksResponse.items
             .map((item) => item.track)
             .filter(Boolean);
@@ -361,14 +364,26 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     if (currentTrack) {
       // Only predict if this is a new track we haven't predicted for yet
       if (currentTrack.id !== lastPredictedTrackId) {
-        setLastPredictedTrackId(currentTrack.id);
-        predictPlaylist(currentTrack.id);
+        // Check if the current track is already in the predicted playlist's tracklist
+        const isTrackInPredictedPlaylist = predictedPlaylist?.tracks?.some(
+          (track: any) => track.id === currentTrack.id
+        );
+        
+        if (isTrackInPredictedPlaylist) {
+          // Track is already in the predicted playlist, just update the last predicted track ID
+          setLastPredictedTrackId(currentTrack.id);
+          console.log("Track is already in predicted playlist, skipping prediction");
+        } else {
+          // Track is not in the predicted playlist, run prediction
+          setLastPredictedTrackId(currentTrack.id);
+          predictPlaylist(currentTrack.id);
+        }
       }
     } else {
       setPredictedPlaylist(null);
       setLastPredictedTrackId(null);
     }
-  }, [currentTrack?.id, lastPredictedTrackId, predictPlaylist]);
+  }, [currentTrack?.id, lastPredictedTrackId, predictPlaylist, predictedPlaylist]);
 
   // Predict on initial load if there's already a current track
   useEffect(() => {
