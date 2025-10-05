@@ -152,7 +152,7 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
   currentPlaylistId,
   playlistTracks = [],
 }) => {
-  const { currentTrack, position, playTrack, seekToPosition } = useSpotify();
+  const { currentTrack, position, playTrack, seekToPosition, predictedPlaylist, isPredictingPlaylist } = useSpotify();
   const navigate = useNavigate();
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [currentTrackComments, setCurrentTrackComments] = useState<any[]>([]);
@@ -352,6 +352,38 @@ const NowPlaying: React.FC<NowPlayingProps> = ({
             "Start listening in Spotify"}
         </NowPlayingArtists>
       </NowPlayingInfo>
+
+      {/* Predicted Playlist Display */}
+      {predictedPlaylist && (
+        <div
+          style={{
+            marginTop: "8px",
+            padding: "8px 12px",
+            background: "rgba(29, 185, 84, 0.1)",
+            border: "1px solid rgba(29, 185, 84, 0.3)",
+            borderRadius: "8px",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+          onClick={() => navigate(`/playlist/${predictedPlaylist.id}`)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(29, 185, 84, 0.2)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(29, 185, 84, 0.1)";
+          }}
+        >
+          <div style={{ fontSize: "12px", color: "#1db954", fontWeight: "600" }}>
+            {isPredictingPlaylist ? "Detecting playlist..." : "Listening to"}
+          </div>
+          <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.9)", marginTop: "2px" }}>
+            {predictedPlaylist.name}
+          </div>
+          <div style={{ fontSize: "10px", color: "rgba(255, 255, 255, 0.6)", marginTop: "1px" }}>
+            by {predictedPlaylist.owner.displayName}
+          </div>
+        </div>
+      )}
     </NowPlayingContainer>
   );
 };

@@ -9,11 +9,23 @@ import React, {
 import SpotifyWebApi from "spotify-web-api-js";
 import axios from "axios";
 
+interface PredictedPlaylist {
+  id: string;
+  name: string;
+  owner: {
+    id: string;
+    displayName: string;
+  };
+  tracks: any[];
+}
+
 interface SpotifyContextType {
   spotifyApi: SpotifyWebApi.SpotifyWebApiJs;
   currentTrack: SpotifyApi.TrackObjectFull | null;
   isPlaying: boolean;
   position: number;
+  predictedPlaylist: PredictedPlaylist | null;
+  isPredictingPlaylist: boolean;
   playTrack: (
     trackUri: string,
     playlistTracks?: string[],
@@ -48,6 +60,8 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     useState<SpotifyApi.TrackObjectFull | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
+  const [predictedPlaylist, setPredictedPlaylist] = useState<PredictedPlaylist | null>(null);
+  const [isPredictingPlaylist, setIsPredictingPlaylist] = useState(false);
 
   // Set access token when component mounts
   useEffect(() => {
@@ -250,11 +264,55 @@ export const SpotifyProvider: React.FC<SpotifyProviderProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // spotifyApi is already memoized with useState
 
+  // Predict playlist for current track
+  const predictPlaylist = useCallback(async (trackId: string) => {
+    if (!trackId) return;
+    
+    setIsPredictingPlaylist(true);
+    try {
+      const response = await axios.post('/api/playlist/predict', {
+        trackId,
+        userId: localStorage.getItem('userId')
+      });
+      
+      if (response.data && response.data.playlist) {
+        setPredictedPlaylist(response.data.playlist);
+      } else {
+        setPredictedPlaylist(null);
+      }
+    } catch (error) {
+      console.error('Error predicting playlist:', error);
+      setPredictedPlaylist(null);
+    } finally {
+      setIsPredictingPlaylist(false);
+    }
+  }, []);
+
+  // Check if current track is in predicted playlist
+  const isCurrentTrackInPredictedPlaylist = useCallback(() => {
+    if (!currentTrack || !predictedPlaylist) return false;
+    return predictedPlaylist.tracks.some((track: any) => track.id === currentTrack.id);
+  }, [currentTrack, predictedPlaylist]);
+
+  // Predict playlist when track changes
+  useEffect(() => {
+    if (currentTrack) {
+      // If current track is not in predicted playlist, predict new one
+      if (!isCurrentTrackInPredictedPlaylist()) {
+        predictPlaylist(currentTrack.id);
+      }
+    } else {
+      setPredictedPlaylist(null);
+    }
+  }, [currentTrack, isCurrentTrackInPredictedPlaylist, predictPlaylist]);
+
   const value = {
     spotifyApi,
     currentTrack,
     isPlaying,
     position,
+    predictedPlaylist,
+    isPredictingPlaylist,
     playTrack,
     pauseTrack,
     resumeTrack,

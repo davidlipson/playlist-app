@@ -946,9 +946,7 @@ const TrackList: React.FC<TrackListProps> = ({
                   : "Toggle comments"
               }
             >
-              {capturedTimestamps[track.id] && capturedTimestamps[track.id] > 0
-                ? "⏰"
-                : "💬"}
+              💬
             </CommentButton>
           </TrackLikesButtons>
           <UserList users={getLikeUsers(track)} variant="small" />
