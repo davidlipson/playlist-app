@@ -417,8 +417,14 @@ const TrackList: React.FC<TrackListProps> = ({
   collaborators,
   playlistOwner,
 }) => {
-  const { playTrack, currentTrack, isPlaying, position, getCurrentState, seekToPosition } =
-    useSpotify();
+  const {
+    playTrack,
+    currentTrack,
+    isPlaying,
+    position,
+    getCurrentState,
+    seekToPosition,
+  } = useSpotify();
   const { user } = useAuth();
   const [trackLikes, setTrackLikes] = useState<{ [trackId: string]: Like[] }>(
     {}
@@ -1212,54 +1218,45 @@ const TrackList: React.FC<TrackListProps> = ({
                       </button>
                     </form>
                   ) : (
-                    <div>
-                      {/* Show timestamp if comment has one */}
+                    <div
+                      style={{
+                        color: "rgba(255, 255, 255, 0.7)",
+                        fontSize: "14px",
+                        lineHeight: "1.4",
+                        cursor:
+                          comment.inSongTimestamp &&
+                          comment.inSongTimestamp > 0
+                            ? "pointer"
+                            : "default",
+                      }}
+                      onClick={
+                        comment.inSongTimestamp && comment.inSongTimestamp > 0
+                          ? () =>
+                              handleTimestampedCommentClick(comment, track)
+                          : undefined
+                      }
+                      title={
+                        comment.inSongTimestamp && comment.inSongTimestamp > 0
+                          ? "Click to jump to this point in the song"
+                          : undefined
+                      }
+                    >
+                      {/* Show timestamp inline if comment has one */}
                       {comment.inSongTimestamp &&
                         comment.inSongTimestamp > 0 && (
-                          <div
+                          <span
                             style={{
                               color: "#1db954",
                               fontSize: "12px",
                               fontWeight: "600",
-                              marginBottom: "4px",
+                              marginRight: "8px",
                               cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
                             }}
-                            onClick={() =>
-                              handleTimestampedCommentClick(comment, track)
-                            }
-                            title="Click to jump to this point in the song"
                           >
                             ⏰ {formatTimestamp(comment.inSongTimestamp)}
-                          </div>
+                          </span>
                         )}
-                      <div
-                        style={{
-                          color: "rgba(255, 255, 255, 0.7)",
-                          fontSize: "14px",
-                          lineHeight: "1.4",
-                          cursor:
-                            comment.inSongTimestamp &&
-                            comment.inSongTimestamp > 0
-                              ? "pointer"
-                              : "default",
-                        }}
-                        onClick={
-                          comment.inSongTimestamp && comment.inSongTimestamp > 0
-                            ? () =>
-                                handleTimestampedCommentClick(comment, track)
-                            : undefined
-                        }
-                        title={
-                          comment.inSongTimestamp && comment.inSongTimestamp > 0
-                            ? "Click to jump to this point in the song"
-                            : undefined
-                        }
-                      >
-                        {comment.content}
-                      </div>
+                      {comment.content}
                     </div>
                   )}
                 </div>
