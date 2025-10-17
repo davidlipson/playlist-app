@@ -9,13 +9,9 @@ const router = express.Router();
 // Get user's Spotify playlists
 router.get("/my-playlists", authenticateToken, async (req, res) => {
   try {
-    const { limit = 50, offset = 0 } = req.query;
-
-    // Get playlists from Spotify
-    const spotifyPlaylists = await spotifyService.getUserPlaylists(
-      req.user.accessToken,
-      parseInt(limit),
-      parseInt(offset)
+    // Get all playlists from Spotify (no pagination needed)
+    const spotifyPlaylists = await spotifyService.getAllUserPlaylists(
+      req.user.accessToken
     );
 
     // Get our database playlists for this user
@@ -90,8 +86,6 @@ router.get("/my-playlists", authenticateToken, async (req, res) => {
     res.json({
       playlists,
       total: spotifyPlaylists.total,
-      limit: spotifyPlaylists.limit,
-      offset: spotifyPlaylists.offset,
     });
   } catch (error) {
     console.error("Error fetching playlists:", error);

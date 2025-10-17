@@ -109,6 +109,46 @@ class SpotifyService {
     }
   }
 
+  async getAllUserPlaylists(accessToken) {
+    try {
+      const allPlaylists = [];
+      let offset = 0;
+      const limit = 50; // Spotify's maximum limit per request
+      let hasMore = true;
+
+      while (hasMore) {
+        const response = await axios.get(`${this.baseURL}/me/playlists`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          params: {
+            limit,
+            offset,
+          },
+        });
+
+        const data = response.data;
+        allPlaylists.push(...data.items);
+
+        // Check if we have more playlists to fetch
+        hasMore = data.next !== null;
+        offset += limit;
+      }
+
+      return {
+        items: allPlaylists,
+        total: allPlaylists.length,
+        limit: limit,
+        offset: 0,
+      };
+    } catch (error) {
+      if (error.response?.status === 401) {
+        throw new Error("SPOTIFY_TOKEN_EXPIRED");
+      }
+      throw error;
+    }
+  }
+
   async getPlaylist(accessToken, playlistId) {
     try {
       const response = await axios.get(
